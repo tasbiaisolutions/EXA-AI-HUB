@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Login – EXA{% endblock %}
+
+{% block content %}
+<div class="centered-card" style="max-width:380px;margin:4rem auto;">
+    <h2 style="text-align:center;">Welcome to EXA</h2>
+    <form method="post">
+        {% csrf_token %}
+        <label for="username" style="display:block;margin-bottom:0.4rem;">Your name</label>
+        <input type="text" id="username" name="username" placeholder="Enter your name" required
+               style="width:100%;padding:0.8rem;border-radius:8px;border:1px solid var(--border-subtle);background:rgba(255,255,255,0.03);color:var(--text-main);margin-bottom:1rem;" />
+        <button type="submit" class="btn-primary" style="width:100%;">Continue</button>
+    </form>
+</div>
+{% endblock %}

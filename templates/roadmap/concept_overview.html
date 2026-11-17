@@ -1,0 +1,207 @@
+{% extends 'base.html' %}
+
+{% block title %}Concept Overview – {{ skill.name }} – EXA{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto; padding: 1rem 0 4rem;">
+
+    <!-- Top Breadcrumb -->
+    <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <a href="{% url 'dashboard' pk=goal.pk %}"
+            style="color: var(--text-muted); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem;">
+            &larr; Back to Roadmap
+        </a>
+
+        <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+            <span
+                style="background: rgba(0, 229, 255, 0.1); color: var(--accent-cyan); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase;">
+                {{ goal.domain|default:"Technology" }}
+            </span>
+            <span
+                style="background: rgba(99, 102, 241, 0.15); color: var(--accent-indigo); padding: 0.25rem 0.75rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
+                Level: {{ goal.current_level }}
+            </span>
+        </div>
+    </div>
+
+    <!-- Trainer Hero Card -->
+    <div class="card"
+        style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(0, 229, 255, 0.08)); border: 1px solid rgba(0, 229, 255, 0.25); border-radius: 18px; padding: 2.25rem; margin-bottom: 2rem; position: relative; overflow: hidden;">
+        <div style="display: flex; gap: 1.5rem; align-items: flex-start; flex-wrap: wrap;">
+            <div
+                style="width: 56px; height: 56px; border-radius: 14px; background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan)); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex-shrink: 0; box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);">
+                🧭
+            </div>
+
+            <div style="flex: 1; min-width: 250px;">
+                <span
+                    style="color: var(--accent-cyan); font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1.5px;">
+                    Your course mentor
+                </span>
+
+                <h1
+                    style="margin: 0.25rem 0 0.75rem; font-size: 2.2rem; color: var(--text-main); font-weight: 800; letter-spacing: -0.5px;">
+                    {{ skill.name }}
+                </h1>
+
+                <p style="margin: 0; color: #cbd5e1; font-size: 1.05rem; line-height: 1.6;">
+                    Welcome to your personalized learning track for
+                    <strong>{{ goal.goal|title }} ({{ goal.domain|capfirst }})</strong>.
+                    Learn step by step through focused concepts, practical walkthroughs, quizzes, and milestone projects.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Educational Architecture Visual -->
+    {% if visuals and visuals.diagram_svg %}
+    <div class="card"
+        style="background: linear-gradient(180deg, rgba(15, 23, 42, 0.95), rgba(8, 13, 24, 0.95)); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 18px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.35);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.65rem;">
+                <span style="font-size: 1.3rem;">📊</span>
+                <div>
+                    <h2 style="color: var(--accent-cyan); margin: 0; font-size: 1.15rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px;">
+                        Visual Learning: {{ visuals.diagram_title }}
+                    </h2>
+                    <span style="color: var(--text-muted); font-size: 0.85rem;">System Architecture & Execution Pipeline</span>
+                </div>
+            </div>
+            <span style="background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.25); color: var(--accent-cyan); font-size: 0.75rem; font-weight: 700; padding: 0.25rem 0.6rem; border-radius: 999px;">
+                Interactive Architecture
+            </span>
+        </div>
+
+        <div style="margin: 0.75rem 0 1rem 0;">
+            {{ visuals.diagram_svg|safe }}
+        </div>
+
+        {% if visuals.diagram_caption %}
+        <p style="margin: 0; color: #94a3b8; font-size: 0.9rem; line-height: 1.6; font-style: italic; background: rgba(2, 6, 23, 0.5); padding: 0.75rem 1rem; border-radius: 8px; border-left: 3px solid var(--accent-cyan);">
+            <strong style="color: #cbd5e1; font-style: normal;">Key Understanding:</strong> {{ visuals.diagram_caption }}
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Core Track Skills -->
+    <div class="card"
+        style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
+
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem;">
+            <span style="font-size: 1.4rem;">🎯</span>
+            <h2 style="margin: 0; color: var(--text-main); font-size: 1.35rem; font-weight: 700;">
+                Core Skills Required for {{ goal.goal|title }}
+            </h2>
+        </div>
+
+        <p
+            style="color: var(--text-muted); font-size: 0.95rem; margin-top: 0; margin-bottom: 1.5rem; line-height: 1.6;">
+            Build progressive mastery through structured concepts, practice exercises, quizzes, and hands-on portfolio projects.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem;">
+            {% for s in goal.skill_nodes.all %}
+            <div
+                style="background: rgba(255,255,255,0.02); border: 1px solid {% if s.pk == skill.pk %}var(--accent-cyan){% else %}rgba(255,255,255,0.08){% endif %}; border-radius: 12px; padding: 1.25rem;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.5rem;">
+                    <strong style="color: {% if s.pk == skill.pk %}var(--accent-cyan){% else %}var(--text-main){% endif %}; font-size: 1.02rem;">
+                        {{ s.order }}. {{ s.name }}
+                    </strong>
+                    {% if s.is_completed %}
+                    <span style="color: #10b981; font-size: 0.8rem; font-weight: 700;">✓ Done</span>
+                    {% elif s.pk == skill.pk %}
+                    <span style="background: rgba(0,229,255,0.15); color: var(--accent-cyan); font-size: 0.75rem; padding: 0.15rem 0.5rem; border-radius: 10px; font-weight: 700;">Current</span>
+                    {% endif %}
+                </div>
+                <p style="margin: 0; color: var(--text-muted); font-size: 0.88rem; line-height: 1.5;">
+                    {{ s.description|default:s.importance|truncatewords:15 }}
+                </p>
+            </div>
+            {% empty %}
+            <div
+                style="background: rgba(255,255,255,0.02); border: 1px solid rgba(0,229,255,0.15); border-radius: 12px; padding: 1.25rem;">
+                <strong style="color: var(--accent-cyan); font-size: 1.05rem;">{{ skill.name }}</strong>
+                <p style="margin: 0.5rem 0 0 0; color: var(--text-muted); font-size: 0.88rem; line-height: 1.5;">
+                    {{ skill.description|default:"Core practical concepts and foundational mastery for your career goal." }}
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- How this course works -->
+    <div class="card"
+        style="background: linear-gradient(135deg, rgba(16,185,129,0.05), rgba(0,229,255,0.05)); border: 1px solid rgba(16,185,129,0.25); border-radius: 16px; padding: 1.75rem; margin-bottom: 2rem;">
+
+        <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.75rem;">
+            <span style="font-size: 1.3rem;">⚡</span>
+            <h3
+                style="margin: 0; color: #10b981; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1.5px; font-weight: 700;">
+                A simple way to learn
+            </h3>
+        </div>
+
+        <div
+            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; color: #cbd5e1; font-size: 0.92rem; line-height: 1.5;">
+            <div><strong>1. One Concept at a Time:</strong> Learn one focused concept at your own pace without information overload.</div>
+            <div><strong>2. Practical Code & Examples:</strong> Study real-world domain examples, code walkthroughs, and patterns.</div>
+            <div><strong>3. Quick Knowledge Check:</strong> Verify your understanding with an interactive 5-question check.</div>
+            <div><strong>4. Hands-on Project:</strong> Apply the concepts to build a portfolio-ready milestone project.</div>
+        </div>
+    </div>
+
+    <!-- Concept Roadmap -->
+    <div class="card"
+        style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 2rem; margin-bottom: 2.5rem;">
+
+        <h2
+            style="color: var(--text-main); font-family: 'Outfit', sans-serif; font-size: 1.3rem; margin-top: 0; margin-bottom: 1.25rem;">
+            Concepts You'll Master in This Skill ({{ skill.skill_map_json|length }} Steps)
+        </h2>
+
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for concept in skill.skill_map_json %}
+            <div
+                style="display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; gap: 1rem; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <div
+                        style="width: 32px; height: 32px; border-radius: 8px; background: rgba(0, 229, 255, 0.1); border: 1px solid var(--accent-cyan); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--accent-cyan); font-size: 0.85rem; flex-shrink: 0;">
+                        {{ forloop.counter }}
+                    </div>
+                    <div>
+                        <strong style="color: var(--text-main); font-size: 1rem;">
+                            {{ concept.name }}
+                        </strong>
+                        <p style="margin: 0.25rem 0 0; color: var(--text-muted); font-size: 0.85rem;">
+                            {{ concept.description|default:"Core practical concept for your learning path" }}
+                        </p>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <span
+                        style="font-size: 0.8rem; color: var(--text-muted); background: rgba(255,255,255,0.05); padding: 0.25rem 0.65rem; border-radius: 6px;">
+                        ⏱️ {{ concept.estimated_time|default:"15 min" }}
+                    </span>
+                </div>
+            </div>
+            {% empty %}
+            <p style="color: var(--text-muted); margin: 0; text-align: center; padding: 2rem;">
+                Concepts are ready to begin. Click below to start your lessons!
+            </p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Start Learning Button -->
+    <div style="text-align: center;">
+        <a href="{% url 'teach_concept' pk=skill.pk %}" class="btn-primary"
+            style="padding: 1.15rem 3.5rem; font-size: 1.15rem; font-weight: 700; border-radius: 12px; box-shadow: 0 6px 30px rgba(0,229,255,0.35); text-decoration: none; display: inline-flex; align-items: center; gap: 0.75rem;">
+            <span>Start Learning Concept 1</span> &rarr;
+        </a>
+    </div>
+
+</div>
+{% endblock %}

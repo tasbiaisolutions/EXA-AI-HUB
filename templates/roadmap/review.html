@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Mentor Review & Re-Teaching — {{ concept.name }} — EXA{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 0 auto; padding: 1rem 0 4rem;">
+
+    <!-- Top Navigation -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <a href="{% url 'skill_map' pk=skill.pk %}" style="color: var(--text-muted); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='var(--text-muted)'">
+            &larr; Back to Skill Map
+        </a>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); color: #f59e0b; padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">
+                Phase: Mentor Re-Teaching
+            </span>
+            <button id="voice-btn" class="btn-primary" style="background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 0.4rem 0.9rem; font-size: 0.85rem; border-radius: 8px; cursor: pointer;" onclick="toggleVoice()">
+                🔊 Read Aloud
+            </button>
+        </div>
+    </div>
+
+    <!-- Mentor Guidance Header -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(99, 102, 241, 0.1)); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 18px; padding: 2.25rem; margin-bottom: 2rem;">
+        <div style="display: flex; gap: 1.25rem; align-items: flex-start;">
+            <div style="width: 52px; height: 52px; border-radius: 14px; background: linear-gradient(135deg, #f59e0b, #6366f1); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex-shrink: 0; box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);">
+                🧑‍🏫
+            </div>
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.4rem;">
+                    <h1 style="margin: 0; font-size: 1.6rem; color: var(--text-main); font-weight: 800;">
+                        Targeted Re-Teaching: {{ concept.name }}
+                    </h1>
+                </div>
+                <p id="tts-encouragement" style="margin: 0; color: #cbd5e1; font-size: 1.05rem; line-height: 1.6;">
+                    {{ review_data.encouragement|default:"No worries at all! Great engineers learn through iteration. Let's re-examine the core idea together and tackle it fresh." }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Questions Missed Summary -->
+    {% if wrong_questions %}
+    <div class="card" style="background: var(--bg-card); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; padding: 1.75rem; margin-bottom: 2rem;">
+        <h3 style="margin: 0 0 1rem 0; color: #ef4444; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1.5px; display: flex; align-items: center; gap: 0.5rem;">
+            <span>⚠️</span> Questions That Need Strengthening ({{ wrong_questions|length }})
+        </h3>
+        
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            {% for w in wrong_questions %}
+            <div style="background: rgba(255,255,255,0.02); border-left: 3px solid #ef4444; padding: 1rem 1.25rem; border-radius: 0 10px 10px 0;">
+                <p style="margin: 0 0 0.5rem 0; color: #fff; font-weight: 600; font-size: 0.95rem;">
+                    {{ w.question_text }}
+                </p>
+                <div style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.5;">
+                    <span style="color: #ef4444; font-weight: 600;">You selected: {{ w.user_answer|default:"None" }}</span> &bull; 
+                    <p style="margin: 0.35rem 0 0 0; color: var(--text-muted);">{{ w.explanation }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Re-Teaching Core Concept -->
+    <div class="card" style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 2rem; margin-bottom: 2rem;">
+        <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem;">
+            <span style="font-size: 1.3rem;">💡</span>
+            <h3 style="margin: 0; color: var(--accent-cyan); text-transform: uppercase; font-size: 0.9rem; letter-spacing: 2px; font-weight: 700;">
+                Simplified Core Concept
+            </h3>
+        </div>
+        
+        <p id="tts-core" style="color: #fff; font-size: 1.15rem; line-height: 1.7; margin-bottom: 1.5rem; font-weight: 500;">
+            {{ lesson.core_concept }}
+        </p>
+
+        {% if review_data.targeted_re_explanation %}
+        <div style="background: rgba(0, 229, 255, 0.04); border-left: 3px solid var(--accent-cyan); padding: 1rem 1.25rem; border-radius: 0 10px 10px 0; margin-bottom: 1.5rem;">
+            <strong style="color: var(--accent-cyan); display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.35rem;">
+                Why This Confuses People & How to Master It:
+            </strong>
+            <p id="tts-re-explain" style="margin: 0; color: #cbd5e1; font-size: 0.95rem; line-height: 1.6;">
+                {{ review_data.targeted_re_explanation }}
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Code Example to cement learning -->
+        <h4 style="margin: 1.5rem 0 0.75rem 0; color: var(--text-muted); text-transform: uppercase; font-size: 0.8rem; letter-spacing: 1.5px;">
+            Walkthrough Code Example:
+        </h4>
+        <pre style="margin: 0; background: #07080c; border: 1px solid rgba(255,255,255,0.08); padding: 1.25rem; border-radius: 10px; overflow-x: auto; color: #38bdf8; font-family: 'Consolas', monospace; font-size: 0.95rem; line-height: 1.6;"><code>{{ lesson.code_example }}</code></pre>
+    </div>
+
+    <!-- Ready to Retake -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(0, 229, 255, 0.1), rgba(16, 185, 129, 0.1)); border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 18px; padding: 2.25rem; text-align: center;">
+        <div style="font-size: 2.2rem; margin-bottom: 0.5rem;">🎯</div>
+        <h2 style="margin: 0 0 0.5rem 0; font-size: 1.4rem; color: var(--text-main); font-weight: 800;">
+            Ready to Prove Mastery?
+        </h2>
+        <p style="margin: 0 auto 1.75rem auto; color: var(--text-muted); font-size: 0.95rem; max-width: 500px;">
+            Take the 5-question assessment again. Score <strong>5/5</strong> to unlock the celebration applause and next lesson!
+        </p>
+
+        <a href="{% url 'quiz' pk=skill.pk %}" class="btn-primary" style="background: var(--gradient-primary); border: none; color: #000; font-weight: 800; padding: 1rem 3.5rem; font-size: 1.1rem; border-radius: 12px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.75rem; box-shadow: 0 4px 25px rgba(0, 229, 255, 0.35);">
+            Retake Quiz Now (Target: 5/5) &rarr;
+        </a>
+    </div>
+
+</div>
+
+<script>
+    let isSpeaking = false;
+    let synth = window.speechSynthesis;
+
+    function toggleVoice() {
+        if (isSpeaking) {
+            synth.cancel();
+            isSpeaking = false;
+            document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+            return;
+        }
+
+        const textToRead = [
+            document.getElementById('tts-encouragement')?.innerText,
+            document.getElementById('tts-core')?.innerText,
+            document.getElementById('tts-re-explain')?.innerText
+        ].filter(Boolean).join('. ');
+
+        if (!textToRead) return;
+
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.rate = 1.0;
+        utterance.onend = () => {
+            isSpeaking = false;
+            document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+        };
+        utterance.onerror = () => {
+            isSpeaking = false;
+            document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+        };
+
+        isSpeaking = true;
+        document.getElementById('voice-btn').innerText = "⏹️ Stop";
+        synth.speak(utterance);
+    }
+</script>
+{% endblock %}

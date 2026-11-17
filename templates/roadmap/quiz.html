@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block title %}Concept Assessment (5 Questions) — {{ concept.name }} — EXA{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 0 auto; padding: 1rem 0 4rem;">
+
+    <!-- Top Navigation & Concept Badge -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <a href="{% url 'teach_concept' pk=skill.pk %}" style="color: var(--text-muted); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='var(--text-muted)'">
+            &larr; Back to Lesson
+        </a>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <span style="background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.3); color: var(--accent-cyan); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">
+                Concept {{ concept_index|add:1 }}/{{ total_concepts }} Check
+            </span>
+            <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
+                Target: 5 / 5
+            </span>
+        </div>
+    </div>
+
+    <!-- Quiz Header Banner -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(0, 229, 255, 0.08)); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 18px; padding: 2rem; margin-bottom: 2.5rem; position: relative;">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem;">
+            <span style="font-size: 2rem;">🎯</span>
+            <div>
+                <h1 style="margin: 0; font-size: 1.6rem; color: var(--text-main); font-weight: 800;">
+                    5-Question Assessment: {{ concept.name }}
+                </h1>
+                <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.95rem;">
+                    Answer all 5 questions below. Score <strong>5/5</strong> to unlock the next concept!
+                </p>
+            </div>
+        </div>
+
+        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.06); display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.85rem; color: var(--text-muted);">
+            <div><span style="color: var(--accent-cyan);">●</span> 5 Multiple-Choice Questions</div>
+            <div><span style="color: #10b981;">●</span> Instant Mentor Feedback & Analysis</div>
+            <div><span style="color: var(--accent-indigo);">●</span> Unlimited Retakes if you need review</div>
+        </div>
+    </div>
+
+    <!-- Quiz Form -->
+    <form method="POST" action="{% url 'quiz_submit' pk=skill.pk %}" id="quiz-form">
+        {% csrf_token %}
+
+        <div style="display: flex; flex-direction: column; gap: 2rem; margin-bottom: 2.5rem;">
+            {% for q in questions %}
+            <div class="card quiz-card" style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 2rem; transition: border-color 0.2s, box-shadow 0.2s;">
+                
+                <!-- Question Header -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+                    <span style="font-size: 0.85rem; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 1.5px; background: rgba(0, 229, 255, 0.1); padding: 0.25rem 0.75rem; border-radius: 8px;">
+                        Question {{ forloop.counter }} of {{ questions|length }}
+                    </span>
+                    <span style="font-size: 0.8rem; color: var(--text-muted);">
+                        1 Point
+                    </span>
+                </div>
+
+                <!-- Question Text -->
+                <h3 style="margin: 0 0 1.5rem 0; font-size: 1.15rem; line-height: 1.6; color: var(--text-main); font-weight: 600;">
+                    {{ q.question_text }}
+                </h3>
+
+                <!-- 4 Options (A, B, C, D) -->
+                <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                    <!-- Option A -->
+                    <label class="option-label" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="question_{{ q.pk }}" value="A" required style="accent-color: var(--accent-cyan); width: 20px; height: 20px; flex-shrink: 0;" onchange="highlightOption(this)">
+                        <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.06); align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--accent-cyan); flex-shrink: 0;">A</span>
+                        <span style="color: var(--text-main); font-size: 0.98rem; line-height: 1.5;">{{ q.option_a }}</span>
+                    </label>
+
+                    <!-- Option B -->
+                    <label class="option-label" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="question_{{ q.pk }}" value="B" required style="accent-color: var(--accent-cyan); width: 20px; height: 20px; flex-shrink: 0;" onchange="highlightOption(this)">
+                        <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.06); align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--accent-cyan); flex-shrink: 0;">B</span>
+                        <span style="color: var(--text-main); font-size: 0.98rem; line-height: 1.5;">{{ q.option_b }}</span>
+                    </label>
+
+                    <!-- Option C -->
+                    <label class="option-label" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="question_{{ q.pk }}" value="C" required style="accent-color: var(--accent-cyan); width: 20px; height: 20px; flex-shrink: 0;" onchange="highlightOption(this)">
+                        <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.06); align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--accent-cyan); flex-shrink: 0;">C</span>
+                        <span style="color: var(--text-main); font-size: 0.98rem; line-height: 1.5;">{{ q.option_c }}</span>
+                    </label>
+
+                    <!-- Option D -->
+                    <label class="option-label" style="display: flex; align-items: center; gap: 1rem; padding: 1rem 1.25rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; cursor: pointer; transition: all 0.2s;">
+                        <input type="radio" name="question_{{ q.pk }}" value="D" required style="accent-color: var(--accent-cyan); width: 20px; height: 20px; flex-shrink: 0;" onchange="highlightOption(this)">
+                        <span style="display: inline-flex; width: 28px; height: 28px; border-radius: 8px; background: rgba(255,255,255,0.06); align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; color: var(--accent-cyan); flex-shrink: 0;">D</span>
+                        <span style="color: var(--text-main); font-size: 0.98rem; line-height: 1.5;">{{ q.option_d }}</span>
+                    </label>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Submit Card -->
+        <div class="card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(0, 229, 255, 0.08)); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 18px; padding: 2.25rem; text-align: center;">
+            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.3rem; color: var(--text-main);">
+                Finished All 5 Questions?
+            </h3>
+            <p style="margin: 0 0 1.75rem 0; color: var(--text-muted); font-size: 0.95rem;">
+                Submit now to receive your score, detailed question-by-question breakdown, and mentor review.
+            </p>
+            <button type="submit" id="submit-quiz-btn" class="btn-primary" style="background: var(--gradient-primary); border: none; color: #000; font-weight: 800; padding: 1.1rem 3.5rem; font-size: 1.1rem; border-radius: 12px; cursor: pointer; box-shadow: 0 4px 25px rgba(0, 229, 255, 0.35); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                Submit Quiz for Mentor Review &rarr;
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function highlightOption(radio) {
+        const container = radio.closest('.quiz-card');
+        const labels = container.querySelectorAll('.option-label');
+        labels.forEach(lbl => {
+            lbl.style.background = 'rgba(255,255,255,0.02)';
+            lbl.style.borderColor = 'rgba(255,255,255,0.08)';
+        });
+        const currentLabel = radio.closest('.option-label');
+        currentLabel.style.background = 'rgba(0, 229, 255, 0.08)';
+        currentLabel.style.borderColor = 'var(--accent-cyan)';
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}My Library & Learning Track History — EXA AI HUB{% endblock %}
+
+{% block extra_head %}
+<style>
+    .lib-shell { max-width: 1040px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+    .lib-card { background: rgba(15, 23, 42, 0.75); border: 1px solid rgba(148, 163, 184, 0.16); border-radius: 18px; padding: 1.75rem 2rem; transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s; position: relative; overflow: hidden; margin-bottom: 1.25rem; }
+    .lib-card:hover { transform: translateY(-2px); border-color: rgba(0, 229, 255, 0.4); box-shadow: 0 10px 30px rgba(0,0,0,0.25); }
+    .lib-stripe { position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--gradient-primary); }
+    .resource-card { background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(148, 163, 184, 0.14); border-radius: 14px; padding: 1.35rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="lib-shell">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2.5rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+            <div style="display: inline-block; background: rgba(0, 229, 255, 0.1); border: 1px solid rgba(0, 229, 255, 0.3); color: var(--accent-cyan); padding: 0.3rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">
+                📚 Learner Hub & Library
+            </div>
+            <h1 class="brand-name" style="font-size: clamp(2rem, 4vw, 2.7rem); margin: 0 0 0.5rem 0; font-weight: 800; color: #f8fafc;">
+                Your Learning Journeys
+            </h1>
+            <p style="color: var(--text-muted); margin: 0; font-size: 1.05rem; max-width: 650px; line-height: 1.6;">
+                Resume right where you paused — all your assessments, progress, and stage projects are safely preserved.
+            </p>
+        </div>
+        <a href="{% url 'odin_onboarding' %}?new=1" class="btn-primary" style="background: linear-gradient(135deg, rgba(0,229,255,0.15), rgba(99,102,241,0.2)); border: 1px solid rgba(0,229,255,0.4); color: var(--text-main); padding: 0.8rem 1.6rem; border-radius: 12px; text-decoration: none; font-size: 0.95rem; font-weight: 700; display: inline-flex; align-items: center; gap: 0.5rem;">
+            <span>+</span> Start New Track
+        </a>
+    </div>
+
+    <!-- Active Learning History -->
+    {% if history %}
+        <div style="margin-bottom: 3rem;">
+            <h2 style="color: var(--text-main); font-family: 'Outfit', sans-serif; font-size: 1.35rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+                <span>🎯</span> Active & Saved Roadmaps
+            </h2>
+
+            <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+                {% for item in history %}
+                <div class="lib-card">
+                    <div class="lib-stripe"></div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1.5rem;">
+                        <div style="flex: 1; min-width: 280px;">
+                            <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.5rem; flex-wrap: wrap;">
+                                <span style="background: rgba(99, 102, 241, 0.15); color: var(--accent-indigo); padding: 0.2rem 0.65rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase;">
+                                    {{ item.goal.domain }}
+                                </span>
+                                <span style="background: rgba(0, 229, 255, 0.1); color: var(--accent-cyan); padding: 0.2rem 0.65rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
+                                    {{ item.goal.chosen_tier }} Stage
+                                </span>
+                                {% if item.goal.certificate_issued %}
+                                    <span style="background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; padding: 0.2rem 0.65rem; border-radius: 6px; font-size: 0.75rem; font-weight: 700;">
+                                        🎓 Certified (#{{ item.goal.certificate_id }})
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <h3 style="margin: 0 0 0.5rem 0; font-size: 1.45rem; color: #f8fafc; font-weight: 750;">
+                                {{ item.goal.goal|capfirst }}
+                            </h3>
+
+                            <div style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1rem;">
+                                Currently on: <strong style="color: #e2e8f0;">{{ item.current_skill.name|default:"Roadmap Overview" }}</strong>
+                                <span style="margin: 0 0.4rem; color: var(--border-subtle);">&bull;</span>
+                                <span style="color: var(--accent-cyan); font-weight: 600;">{{ item.phase_label }}</span>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div style="display: flex; align-items: center; gap: 1rem; max-width: 440px;">
+                                <div style="flex: 1; height: 8px; background: rgba(255, 255, 255, 0.08); border-radius: 4px; overflow: hidden;">
+                                    <div style="width: {{ item.progress }}%; height: 100%; background: var(--gradient-primary); border-radius: 4px; transition: width 0.4s ease;"></div>
+                                </div>
+                                <span style="color: var(--text-main); font-weight: 700; font-size: 0.88rem; white-space: nowrap;">{{ item.progress }}% Complete</span>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 0.75rem;">
+                            <a href="{{ item.next_url }}" class="btn-primary" style="padding: 0.85rem 1.85rem; font-size: 0.98rem; font-weight: 750; border-radius: 10px; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 4px 20px rgba(0, 229, 255, 0.25); text-decoration: none;">
+                                Continue Learning &rarr;
+                            </a>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                <a href="{% url 'dashboard' pk=item.goal.pk %}" style="color: var(--text-muted); font-size: 0.85rem; text-decoration: none; padding: 0.3rem 0.65rem; border-radius: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+                                    📊 Gates
+                                </a>
+                                <a href="{% url 'project' pk=item.goal.pk %}" style="color: var(--accent-cyan); font-size: 0.85rem; text-decoration: none; padding: 0.3rem 0.65rem; border-radius: 6px; background: rgba(0, 229, 255, 0.08); border: 1px solid rgba(0, 229, 255, 0.2);">
+                                    🛠️ Projects
+                                </a>
+                                <a href="{% url 'restart_goal' pk=item.goal.pk %}" 
+                                   onclick="return confirm('Do you want to repeat & restart this {{ item.goal.goal }} goal from the beginning?');"
+                                   style="color: #cbd5e1; font-size: 0.85rem; text-decoration: none; padding: 0.3rem 0.65rem; border-radius: 6px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+                                    🔄 Repeat
+                                </a>
+                                <a href="{% url 'delete_goal' pk=item.goal.pk %}" 
+                                   onclick="return confirm('Are you sure you want to permanently delete '{{ item.goal.goal }}' and all its progress?');"
+                                   style="color: #f87171; font-size: 0.85rem; text-decoration: none; padding: 0.3rem 0.65rem; border-radius: 6px; background: rgba(239, 68, 68, 0.08); border: 1px solid rgba(239, 68, 68, 0.2);">
+                                    🗑️ Delete
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% else %}
+        <!-- Empty State -->
+        <div style="text-align: center; padding: 4rem 2rem; background: rgba(15, 23, 42, 0.5); border: 1px dashed rgba(148, 163, 184, 0.25); border-radius: 18px; margin-bottom: 3rem;">
+            <div style="font-size: 3rem; margin-bottom: 1rem;">🌱</div>
+            <h3 style="color: var(--text-main); font-size: 1.4rem; margin-bottom: 0.5rem; font-weight: 700;">No active learning journey yet</h3>
+            <p style="color: var(--text-muted); max-width: 480px; margin: 0 auto 1.75rem auto; line-height: 1.6; font-size: 0.98rem;">
+                Select one of our six specialized domains — Full Stack, AI & ML, Robotics, Data Analysis, Electronics, or Cybersecurity — to start your journey.
+            </p>
+            <a href="{% url 'odin_onboarding' %}" class="btn-primary" style="padding: 0.9rem 2.25rem; font-weight: 700; border-radius: 10px; text-decoration: none;">
+                Create Your First Learning Track &rarr;
+            </a>
+        </div>
+    {% endif %}
+
+    <!-- Curated Knowledge & Trainer Resources -->
+    <section>
+        <h2 style="color: var(--text-main); font-family: 'Outfit', sans-serif; font-size: 1.3rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+            <span>💡</span> EXA AI HUB Mentorship Standards
+        </h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+            <div class="resource-card">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">📊</div>
+                <h4 style="margin: 0 0 0.4rem 0; color: #f8fafc; font-size: 1.05rem;">Visual Concept Diagrams</h4>
+                <p style="margin: 0; color: #94a3b8; font-size: 0.88rem; line-height: 1.6;">
+                    Interactive architectural schematics, request-response cycles, and state machine flowcharts across all six domains.
+                </p>
+            </div>
+            <div class="resource-card">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">⚡</div>
+                <h4 style="margin: 0 0 0.4rem 0; color: #f8fafc; font-size: 1.05rem;">The 80/20 Practice Rule</h4>
+                <p style="margin: 0; color: #94a3b8; font-size: 0.88rem; line-height: 1.6;">
+                    Focusing on the 20% of core mechanisms that solve 80% of real production engineering problems.
+                </p>
+            </div>
+            <div class="resource-card">
+                <div style="font-size: 1.5rem; margin-bottom: 0.5rem;">🛡️</div>
+                <h4 style="margin: 0 0 0.4rem 0; color: #f8fafc; font-size: 1.05rem;">3-Stage Domain Projects</h4>
+                <p style="margin: 0; color: #94a3b8; font-size: 0.88rem; line-height: 1.6;">
+                    Beginner mini projects, Intermediate practical applications, and Advanced industry capstones with automated AI evaluation.
+                </p>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

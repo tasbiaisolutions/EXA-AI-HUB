@@ -1,0 +1,608 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}EXA AI HUB — Visual AI Learning & 3-Stage Project System | TASBI AI SOLUTIONS{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        position: relative;
+        padding: 3rem 0 5rem;
+        text-align: center;
+        overflow: hidden;
+    }
+
+    .hero-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: rgba(0, 229, 255, 0.08);
+        border: 1px solid rgba(0, 229, 255, 0.3);
+        color: var(--accent-cyan);
+        padding: 0.4rem 1.1rem;
+        border-radius: 999px;
+        font-size: 0.82rem;
+        font-weight: 750;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
+    }
+
+    .hero-title {
+        font-size: clamp(2.4rem, 5.5vw, 4.2rem);
+        font-weight: 900;
+        line-height: 1.1;
+        margin: 0 auto 1.25rem auto;
+        max-width: 950px;
+        letter-spacing: -0.03em;
+    }
+
+    .text-gradient {
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .hero-subtitle {
+        font-size: clamp(1.05rem, 2vw, 1.25rem);
+        color: var(--text-muted);
+        max-width: 780px;
+        margin: 0 auto 2.5rem auto;
+        line-height: 1.7;
+    }
+
+    .hero-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 3.5rem;
+    }
+
+    /* Stats Bar */
+    .stats-bar {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1.5rem;
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 1.75rem 2rem;
+        background: rgba(13, 18, 34, 0.7);
+        backdrop-filter: blur(12px);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+    }
+
+    @media (max-width: 768px) {
+        .stats-bar {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.25rem;
+        }
+    }
+
+    .stat-box {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 900;
+        font-family: 'Outfit', sans-serif;
+        color: #ffffff;
+        line-height: 1;
+        margin-bottom: 0.35rem;
+    }
+
+    .stat-label {
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        font-weight: 600;
+    }
+
+    /* Active Goal Resume Banner */
+    .resume-card {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(0, 229, 255, 0.12));
+        border: 2px solid var(--accent-cyan);
+        border-radius: var(--radius-lg);
+        padding: 2rem 2.5rem;
+        margin: 0 auto 3.5rem auto;
+        box-shadow: 0 10px 40px rgba(0, 229, 255, 0.18);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+
+    /* Domain Grid */
+    .section-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .section-tag {
+        color: var(--accent-cyan);
+        font-size: 0.82rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        display: block;
+        margin-bottom: 0.5rem;
+    }
+
+    .section-title {
+        font-size: clamp(2rem, 3.5vw, 2.75rem);
+        font-weight: 800;
+        margin: 0 0 0.75rem 0;
+    }
+
+    .section-subtitle {
+        color: var(--text-muted);
+        font-size: 1.05rem;
+        max-width: 650px;
+        margin: 0 auto;
+        line-height: 1.6;
+    }
+
+    .domains-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+        gap: 1.75rem;
+        margin-bottom: 5rem;
+    }
+
+    .domain-card {
+        background: var(--gradient-dark);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        padding: 2.25rem;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+        position: relative;
+    }
+
+    .domain-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--accent-cyan);
+        box-shadow: 0 15px 35px rgba(0, 229, 255, 0.15);
+    }
+
+    .domain-card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 1.25rem;
+    }
+
+    .domain-icon {
+        width: 54px;
+        height: 54px;
+        border-radius: 14px;
+        background: rgba(0, 229, 255, 0.08);
+        border: 1px solid rgba(0, 229, 255, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+    }
+
+    .domain-title {
+        font-size: 1.45rem;
+        font-weight: 800;
+        margin: 0 0 0.35rem;
+        color: #fff;
+    }
+
+    .domain-tagline {
+        color: var(--accent-cyan);
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 0.85rem;
+    }
+
+    .domain-desc {
+        color: var(--text-muted);
+        font-size: 0.94rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        flex: 1;
+    }
+
+    .stage-projects-mini {
+        background: rgba(8, 12, 22, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 12px;
+        padding: 1.1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+
+    .stage-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.65rem;
+        font-size: 0.84rem;
+        color: #cbd5e1;
+        line-height: 1.45;
+    }
+
+    .stage-pill-sm {
+        font-size: 0.68rem;
+        font-weight: 800;
+        padding: 0.15rem 0.5rem;
+        border-radius: 4px;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .tools-tag-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .tool-tag {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        color: #cbd5e1;
+        font-size: 0.75rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 6px;
+    }
+
+    /* Three-Stage System Section */
+    .stage-system-section {
+        background: linear-gradient(180deg, rgba(13, 18, 34, 0.8), rgba(8, 11, 20, 0.95));
+        border: 1px solid var(--border-subtle);
+        border-radius: 24px;
+        padding: 4rem 2.5rem;
+        margin-bottom: 5rem;
+    }
+
+    .stages-trio-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        margin-top: 3rem;
+    }
+
+    @media (max-width: 900px) {
+        .stages-trio-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stage-trio-card {
+        background: rgba(8, 12, 22, 0.85);
+        border: 1px solid var(--border-subtle);
+        border-radius: 18px;
+        padding: 2.25rem 2rem;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stage-trio-card.beginner {
+        border-top: 4px solid #10B981;
+    }
+    .stage-trio-card.intermediate {
+        border-top: 4px solid #6366F1;
+    }
+    .stage-trio-card.advanced {
+        border-top: 4px solid #F59E0B;
+    }
+
+    .stage-badge-big {
+        display: inline-block;
+        padding: 0.35rem 0.85rem;
+        border-radius: 8px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 1rem;
+        width: fit-content;
+    }
+
+    /* Visual Feature Showcase */
+    .visual-showcase-box {
+        background: rgba(8, 12, 22, 0.9);
+        border: 1px solid rgba(0, 229, 255, 0.3);
+        border-radius: 20px;
+        padding: 2.5rem;
+        margin-bottom: 5rem;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 1. HERO SECTION -->
+<section class="hero-section">
+    <div class="hero-badge-pill">
+        <span>⚡</span>
+        <span>EXA AI HUB • TASBI AI SOLUTIONS</span>
+    </div>
+
+    <h1 class="hero-title">
+        Visual AI Learning &amp; <br>
+        <span class="text-gradient">3-Stage Project Mastery</span>
+    </h1>
+
+    <p class="hero-subtitle">
+        Accelerate from zero to verified industry mastery. Experience clear technical architecture diagrams, concept-level walkthroughs, instant AI teacher feedback, and three comprehensive stage projects across six core engineering domains.
+    </p>
+
+    <!-- Resume Banner if user has existing progress -->
+    {% if goal %}
+    <div class="resume-card">
+        <div style="display:flex; align-items:center; gap:1.25rem;">
+            <div style="width:56px; height:56px; border-radius:14px; background:var(--gradient-primary); display:grid; place-items:center; font-size:1.8rem; flex-shrink:0;">
+                🚀
+            </div>
+            <div style="text-align:left;">
+                <div style="display:flex; align-items:center; gap:0.6rem; margin-bottom:0.25rem;">
+                    <span class="stage-pill stage-pill-beginner">{{ goal.chosen_tier }} Stage</span>
+                    <span style="color:var(--text-muted); font-size:0.85rem;">{{ goal.domain|title }}</span>
+                </div>
+                <h3 style="margin:0 0 0.3rem 0; font-size:1.45rem; color:#fff;">Welcome back, {{ goal.user_name }}!</h3>
+                <p style="margin:0; color:#cbd5e1; font-size:0.95rem;">
+                    Currently working on: <strong style="color:var(--accent-cyan);">{{ active_skill.name|default:goal.goal|title }}</strong>
+                    <span style="opacity:0.5; margin:0 6px;">•</span>
+                    Progress: <strong>{{ goal.progress_percentage }}%</strong>
+                </p>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap;">
+            <a href="{% url 'home' %}?resume=1" class="btn-primary" style="padding:0.9rem 2.25rem;">
+                Continue Where You Paused &rarr;
+            </a>
+            <a href="{% url 'dashboard' pk=goal.pk %}" class="btn-secondary">
+                View Roadmap
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="hero-actions">
+        <a href="#domains-section" class="btn-primary" style="font-size:1.05rem; padding:1rem 2.5rem;">
+            <span>Explore 6 Engineering Domains</span>
+            <span>&darr;</span>
+        </a>
+        <a href="{% url 'odin_onboarding' %}" class="btn-secondary" style="font-size:1.05rem; padding:1rem 2.25rem;">
+            <span>+ Build Custom Curriculum</span>
+        </a>
+    </div>
+
+    <!-- Platform Stats -->
+    <div class="stats-bar">
+        <div class="stat-box">
+            <div class="stat-number">6</div>
+            <div class="stat-label">Core Domains</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">18</div>
+            <div class="stat-label">Stage Projects</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">100%</div>
+            <div class="stat-label">Visual Diagrams</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">24/7</div>
+            <div class="stat-label">AI Mentors Online</div>
+        </div>
+    </div>
+</section>
+
+<!-- 2. SIX LEARNING DOMAINS SECTION -->
+<section id="domains-section" style="padding-top:2rem;">
+    <div class="section-header">
+        <span class="section-tag">Comprehensive Curriculums</span>
+        <h2 class="section-title">Six Specialized Learning Domains</h2>
+        <p class="section-subtitle">
+            Every domain features visual architecture diagrams, step-by-step learning units, instant quiz verification, and three milestone stage projects.
+        </p>
+    </div>
+
+    <div class="domains-grid">
+        {% for domain in domain_cards %}
+        <div class="domain-card">
+            <div class="domain-card-header">
+                <div class="domain-icon">{{ domain.icon }}</div>
+                <span class="stage-pill stage-pill-beginner">3 Stage Projects</span>
+            </div>
+
+            <h3 class="domain-title">{{ domain.name }}</h3>
+            <div class="domain-tagline">{{ domain.tagline }}</div>
+            <p class="domain-desc">{{ domain.description }}</p>
+
+            <div class="stage-projects-mini">
+                <div style="font-size:0.75rem; font-weight:800; color:var(--accent-cyan); text-transform:uppercase; letter-spacing:1px; margin-bottom:0.25rem;">
+                    Stage-Based Project System:
+                </div>
+                <div class="stage-item">
+                    <span class="stage-pill-sm stage-pill-beginner">Beginner</span>
+                    <span>{{ domain.beginner_proj }}</span>
+                </div>
+                <div class="stage-item">
+                    <span class="stage-pill-sm stage-pill-intermediate">Inter.</span>
+                    <span>{{ domain.intermediate_proj }}</span>
+                </div>
+                <div class="stage-item">
+                    <span class="stage-pill-sm stage-pill-advanced">Adv.</span>
+                    <span>{{ domain.advanced_proj }}</span>
+                </div>
+            </div>
+
+            <div class="tools-tag-row">
+                <span style="font-size:0.75rem; color:var(--text-subtle); display:block; width:100%; margin-bottom:0.2rem;">Core Tech:</span>
+                <span class="tool-tag">{{ domain.tools }}</span>
+            </div>
+
+            <div style="display:flex; gap:0.75rem; margin-top:auto;">
+                <a href="{{ domain.start_url }}" class="btn-primary" style="flex:1; padding:0.75rem 1rem; font-size:0.9rem;">
+                    Start This Track &rarr;
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- 3. THE THREE-STAGE PROJECT SYSTEM -->
+<section class="stage-system-section">
+    <div class="section-header">
+        <span class="section-tag">Practical Portfolio Engine</span>
+        <h2 class="section-title">The Three-Stage Project System</h2>
+        <p class="section-subtitle">
+            Every learning domain provides exactly three properly designed stage projects—not one per lesson. Concept exercises build confidence; stage projects prove portfolio-ready competence.
+        </p>
+    </div>
+
+    <div class="stages-trio-grid">
+        <!-- Stage 1 -->
+        <div class="stage-trio-card beginner">
+            <span class="stage-badge-big stage-pill-beginner">Stage 1: Beginner</span>
+            <h3 style="margin:0 0 0.75rem; font-size:1.35rem; color:#fff;">Simple Mini Project</h3>
+            <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.6; margin-bottom:1.25rem;">
+                Tailored for learners starting from zero. Focuses on foundational syntax, clean structure, and clear expected outputs.
+            </p>
+            <ul style="padding-left:1.2rem; color:#cbd5e1; font-size:0.88rem; line-height:1.7; margin-bottom:1.5rem; flex:1;">
+                <li>Clear starter materials &amp; schema provided</li>
+                <li>Bounded scope (2-3 core requirements)</li>
+                <li>Direct PDF verification &amp; screen recording</li>
+                <li>Immediate mentor rubric evaluation</li>
+            </ul>
+            <div style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.25); border-radius:10px; padding:0.85rem; font-size:0.82rem; color:#6ee7b7;">
+                <strong>Goal:</strong> Gain early momentum and build your first functioning artifact.
+            </div>
+        </div>
+
+        <!-- Stage 2 -->
+        <div class="stage-trio-card intermediate">
+            <span class="stage-badge-big stage-pill-intermediate">Stage 2: Intermediate</span>
+            <h3 style="margin:0 0 0.75rem; font-size:1.35rem; color:#fff;">Practical Real-Style App</h3>
+            <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.6; margin-bottom:1.25rem;">
+                Requires applying multiple interconnected concepts: data handling, error edge-cases, validation, and REST API integration.
+            </p>
+            <ul style="padding-left:1.2rem; color:#cbd5e1; font-size:0.88rem; line-height:1.7; margin-bottom:1.5rem; flex:1;">
+                <li>Real-style company datasets &amp; schemas</li>
+                <li>Handling dirty, incomplete, or edge-case data</li>
+                <li>Full CRUD operations or multi-step pipelines</li>
+                <li>Live demonstration URL required</li>
+            </ul>
+            <div style="background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.25); border-radius:10px; padding:0.85rem; font-size:0.82rem; color:#a5b4fc;">
+                <strong>Goal:</strong> Transition from syntax recall to practical engineering problem-solving.
+            </div>
+        </div>
+
+        <!-- Stage 3 -->
+        <div class="stage-trio-card advanced">
+            <span class="stage-badge-big stage-pill-advanced">Stage 3: Advanced</span>
+            <h3 style="margin:0 0 0.75rem; font-size:1.35rem; color:#fff;">Industry-Style Capstone</h3>
+            <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.6; margin-bottom:1.25rem;">
+                Demonstrates deep, production-level engineering: security, containerization, optimization, automated testing, and live cloud deployment.
+            </p>
+            <ul style="padding-left:1.2rem; color:#cbd5e1; font-size:0.88rem; line-height:1.7; margin-bottom:1.5rem; flex:1;">
+                <li>Production constraints (latency, security, safety)</li>
+                <li>Automated test suite &amp; Docker containerization</li>
+                <li>Formal Engineering Dossier &amp; metric readout</li>
+                <li>Live public HTTPS deployment with verified score</li>
+            </ul>
+            <div style="background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.25); border-radius:10px; padding:0.85rem; font-size:0.82rem; color:#fde68a;">
+                <strong>Goal:</strong> Build an impressive portfolio capstone that commands hiring respect.
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 4. VISUAL LEARNING SHOWCASE -->
+<section style="margin-bottom:5rem;">
+    <div class="section-header">
+        <span class="section-tag">Visual-First Pedagogy</span>
+        <h2 class="section-title">Educational Visuals That Actually Teach</h2>
+        <p class="section-subtitle">
+            No irrelevant stock photos or decorative fluff. EXA AI HUB provides crisp, responsive SVG architecture diagrams, state flowcharts, and comparison matrices embedded directly in every lesson.
+        </p>
+    </div>
+
+    <div class="visual-showcase-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-subtle); padding-bottom:1rem; margin-bottom:1.5rem; flex-wrap:wrap; gap:1rem;">
+            <div>
+                <h3 style="margin:0; font-size:1.25rem; color:#fff;">Interactive Architecture Preview</h3>
+                <span style="font-size:0.82rem; color:var(--accent-cyan);">Responsive Vector SVG • Scalable across Desktop, Tablet &amp; Mobile</span>
+            </div>
+            <div style="display:flex; gap:0.5rem;">
+                <span class="nav-badge">High Contrast Dark Mode</span>
+                <span class="nav-badge">Zero Fluff</span>
+            </div>
+        </div>
+
+        <!-- Sample Live Responsive SVG Component -->
+        <div style="border-radius:14px; background:rgba(4,7,15,0.7); border:1px solid rgba(0,229,255,0.2); padding:1rem; overflow-x:auto;">
+            <svg viewBox="0 0 800 240" xmlns="http://www.w3.org/2000/svg" style="width:100%; max-width:800px; height:auto; display:block; margin:0 auto; font-family:'Inter',system-ui,sans-serif;" role="img" aria-label="System Architecture Flow">
+                <defs>
+                    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#00E5FF"/>
+                        <stop offset="100%" stop-color="#6366F1"/>
+                    </linearGradient>
+                    <marker id="arrowPill" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 1 L 10 5 L 0 9 z" fill="#00E5FF"/>
+                    </marker>
+                </defs>
+                <rect x="30" y="45" width="150" height="150" rx="12" fill="#0F172A" stroke="#6366F1" stroke-width="2"/>
+                <text x="105" y="85" fill="#6366F1" font-size="13" font-weight="800" text-anchor="middle">1. USER INPUT</text>
+                <text x="105" y="115" fill="#CBD5E1" font-size="11" text-anchor="middle">Browser / Client</text>
+                <text x="105" y="140" fill="#94A3B8" font-size="10" text-anchor="middle">Requests &amp; Telemetry</text>
+                <text x="105" y="170" fill="#00E5FF" font-size="11" font-weight="700" text-anchor="middle">DOM Events</text>
+
+                <path d="M 185 120 L 255 120" stroke="#00E5FF" stroke-width="3" marker-end="url(#arrowPill)"/>
+                <text x="220" y="110" fill="#00E5FF" font-size="10" font-weight="600" text-anchor="middle">HTTPS</text>
+
+                <rect x="260" y="35" width="220" height="170" rx="12" fill="#0F172A" stroke="#00E5FF" stroke-width="2"/>
+                <text x="370" y="75" fill="#00E5FF" font-size="14" font-weight="800" text-anchor="middle">2. AI ORCHESTRATOR</text>
+                <text x="370" y="105" fill="#CBD5E1" font-size="11" text-anchor="middle">Django Logic &amp; Routing</text>
+                <text x="370" y="130" fill="#94A3B8" font-size="10" text-anchor="middle">Adaptive Assessment</text>
+                <text x="370" y="155" fill="#94A3B8" font-size="10" text-anchor="middle">5-Q Quiz &amp; Rubric Scan</text>
+                <text x="370" y="180" fill="#10B981" font-size="11" font-weight="700" text-anchor="middle">Immediate Feedback</text>
+
+                <path d="M 485 120 L 555 120" stroke="#00E5FF" stroke-width="3" marker-end="url(#arrowPill)"/>
+                <text x="520" y="110" fill="#00E5FF" font-size="10" font-weight="600" text-anchor="middle">ORM SQL</text>
+
+                <rect x="560" y="45" width="190" height="150" rx="12" fill="#0F172A" stroke="#10B981" stroke-width="2"/>
+                <text x="655" y="85" fill="#10B981" font-size="13" font-weight="800" text-anchor="middle">3. VERIFIED MASTERY</text>
+                <text x="655" y="115" fill="#CBD5E1" font-size="11" text-anchor="middle">Persistent Progress</text>
+                <text x="655" y="140" fill="#94A3B8" font-size="10" text-anchor="middle">3 Stage Projects</text>
+                <text x="655" y="170" fill="#F59E0B" font-size="11" font-weight="700" text-anchor="middle">Official Certificate</text>
+            </svg>
+        </div>
+    </div>
+</section>
+
+<!-- 5. CALL TO ACTION BANNER -->
+<section style="background:linear-gradient(135deg, rgba(99,102,241,0.2), rgba(0,229,255,0.15)); border:1px solid rgba(0,229,255,0.35); border-radius:24px; padding:3.5rem 2.5rem; text-align:center; box-shadow:0 15px 40px rgba(0,229,255,0.15);">
+    <div style="font-size:2.5rem; margin-bottom:0.75rem;">🎓 ⚡</div>
+    <h2 style="font-size:clamp(1.8rem,3vw,2.5rem); margin:0 0 0.75rem 0; color:#fff;">
+        Start Your Technical Journey on EXA AI HUB
+    </h2>
+    <p style="color:var(--text-muted); font-size:1.05rem; max-width:620px; margin:0 auto 2rem auto; line-height:1.6;">
+        Choose your engineering domain, set your target tier, and let our AI mentor guide you step by step through interactive concepts and portfolio projects.
+    </p>
+    <div style="display:flex; justify-content:center; gap:1rem; flex-wrap:wrap;">
+        <a href="{% url 'odin_onboarding' %}" class="btn-primary" style="padding:1rem 3rem; font-size:1.05rem;">
+            Launch Your Curriculum Now &rarr;
+        </a>
+    </div>
+</section>
+{% endblock %}

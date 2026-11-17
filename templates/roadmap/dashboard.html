@@ -1,0 +1,449 @@
+{% extends 'base.html' %}
+{% block title %}Course Dashboard: {{ goal.goal|title }} — EXA AI HUB | TASBI AI SOLUTIONS{% endblock %}
+
+{% block extra_head %}
+<style>
+    .dash-grid {
+        display: grid;
+        grid-template-columns: 1fr 340px;
+        gap: 2.5rem;
+        align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+        .dash-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    /* Stage Projects Bar */
+    .stage-projects-bar {
+        background: rgba(13, 18, 34, 0.7);
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stage-trio-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .stage-trio-row {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stage-mini-box {
+        background: rgba(8, 12, 22, 0.85);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        padding: 1.15rem;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+
+    .stage-mini-box.active-tier {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 229, 255, 0.04);
+        box-shadow: 0 0 15px rgba(0, 229, 255, 0.15);
+    }
+
+    .level-node-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem 1.75rem;
+        border-radius: 14px;
+        margin-bottom: 0.85rem;
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    @media (max-width: 640px) {
+        .level-node-card {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- 1. Verified Certificate Banner if Issued -->
+{% if goal.certificate_issued %}
+<div class="card" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(0, 229, 255, 0.12)); border: 2px solid #10b981; border-radius: 20px; padding: 2rem 2.5rem; margin-bottom: 2.5rem; box-shadow: 0 10px 35px rgba(16, 185, 129, 0.25);">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+        <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <div style="font-size: 3.5rem; filter: drop-shadow(0 0 15px rgba(16,185,129,0.5));">🎓</div>
+            <div>
+                <span class="stage-pill stage-pill-beginner" style="margin-bottom: 0.4rem;">Official Graduate</span>
+                <h2 style="margin: 0.25rem 0; color: #fff; font-size: 1.8rem; font-weight: 850;">
+                    Certificate of Technical Mastery Issued!
+                </h2>
+                <div style="color: #cbd5e1; font-size: 1rem;">
+                    Awarded to <strong style="color: #fff;">{{ goal.user_name }}</strong> by <strong>TASBI AI SOLUTIONS</strong> for mastering the complete <strong>{{ goal.goal|title }}</strong> curriculum and stage projects.
+                </div>
+            </div>
+        </div>
+        <div style="background: rgba(0,0,0,0.5); border: 1px dashed #10b981; border-radius: 14px; padding: 1rem 1.5rem; text-align: right;">
+            <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 700;">Verification Identifier</div>
+            <div style="font-family: 'JetBrains Mono', monospace; font-size: 1.25rem; color: #10b981; font-weight: 800; margin-top: 0.2rem;">#{{ goal.certificate_id }}</div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="dash-grid">
+    <!-- LEFT MAIN COLUMN -->
+    <div>
+        <!-- Greeting & Course Header -->
+        <div class="card" style="margin-bottom: 2rem; background: var(--gradient-dark); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2.25rem;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 1rem; margin-bottom: 0.6rem;">
+                <h2 style="margin: 0; font-size: 2.2rem; font-weight: 850; letter-spacing: -0.5px;">Welcome back, {{ goal.user_name }}.</h2>
+                <span class="stage-pill {% if goal.chosen_tier == 'Beginner' %}stage-pill-beginner{% elif goal.chosen_tier == 'Intermediate' %}stage-pill-intermediate{% else %}stage-pill-advanced{% endif %}">
+                    {{ goal.chosen_tier }} Stage Active
+                </span>
+            </div>
+            <p style="color: var(--text-muted); margin: 0; font-size: 1.05rem; line-height: 1.6;">
+                Track: <strong style="color: var(--accent-cyan);">{{ goal.goal|title }}</strong>
+                <span style="opacity: 0.3; margin: 0 10px;">|</span>
+                Domain: <strong style="color: #fff;">{{ goal.domain|capfirst }}</strong>
+                <span style="opacity: 0.3; margin: 0 10px;">|</span>
+                AI Mentor: <strong style="color: var(--accent-indigo);">{{ goal.expert_agent_name }}</strong>
+            </p>
+        </div>
+
+        <!-- Three-Stage Project System Highlight -->
+        <div class="stage-projects-bar">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <div>
+                    <h3 style="margin: 0; font-size: 1.2rem; color: #fff; font-weight: 750;">
+                        Three-Stage Project System ({{ goal.domain|capfirst }})
+                    </h3>
+                    <p style="margin: 0.2rem 0 0 0; color: var(--text-muted); font-size: 0.85rem;">
+                        One major portfolio project per stage. Concept drills build foundational understanding; stage projects prove competence.
+                    </p>
+                </div>
+                {% if current_tier_unlocked or current_tier_completed %}
+                <a href="{% url 'project' pk=goal.pk %}" class="btn-primary" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">
+                    🛠️ Open {{ goal.chosen_tier }} Project &rarr;
+                </a>
+                {% else %}
+                <span style="color: #94a3b8; font-size: 0.82rem; font-weight: 600; padding: 0.4rem 0.8rem; border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);">
+                    🔒 Projects Unlock After Stage Completion
+                </span>
+                {% endif %}
+            </div>
+
+            <div class="stage-trio-row">
+                {% if stage_summaries %}
+                    {% for sp in stage_summaries %}
+                    <div class="stage-mini-box {% if sp.stage == goal.chosen_tier %}active-tier{% endif %}">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
+                                <span class="stage-pill-sm {% if sp.stage == 'Beginner' %}stage-pill-beginner{% elif sp.stage == 'Intermediate' %}stage-pill-intermediate{% else %}stage-pill-advanced{% endif %}">
+                                    {{ sp.stage }} Project
+                                </span>
+                                {% if sp.is_completed %}
+                                <span style="font-size: 0.72rem; color: #34d399; font-weight: 700;">✅ COMPLETED ({{ sp.score }}/100)</span>
+                                {% elif sp.is_unlocked %}
+                                <span style="font-size: 0.72rem; color: var(--accent-cyan); font-weight: 700;">🔓 UNLOCKED</span>
+                                {% else %}
+                                <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 700;">🔒 LOCKED ({{ sp.completed_lessons }}/{{ sp.total_lessons }})</span>
+                                {% endif %}
+                            </div>
+                            <h4 style="margin: 0 0 0.4rem 0; font-size: 0.96rem; color: #fff; font-weight: 700; line-height: 1.35;">
+                                {{ sp.display_title }}
+                            </h4>
+                            <p style="margin: 0 0 0.85rem 0; color: var(--text-muted); font-size: 0.8rem; line-height: 1.45;">
+                                {{ sp.display_description }}
+                            </p>
+                        </div>
+                        {% if sp.is_completed %}
+                        <a href="{% url 'project' pk=goal.pk %}?stage={{ sp.stage }}" style="color: #34d399; font-size: 0.82rem; font-weight: 650; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;">
+                            View Submission &rarr;
+                        </a>
+                        {% elif sp.is_unlocked %}
+                        <a href="{% url 'project' pk=goal.pk %}?stage={{ sp.stage }}" style="color: var(--accent-cyan); font-size: 0.82rem; font-weight: 650; text-decoration: none; display: inline-flex; align-items: center; gap: 0.3rem;">
+                            🚀 Open {{ sp.stage }} Project &rarr;
+                        </a>
+                        {% else %}
+                        <span style="color: #64748b; font-size: 0.78rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem;">
+                            🔒 Locked until {{ sp.stage }} completion
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        {% if current_skill %}
+        <!-- Next Action Card -->
+        <div class="card" style="margin-bottom: 2.5rem; border: 1px solid var(--accent-cyan); background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(99, 102, 241, 0.05)); border-radius: var(--radius-lg); position: relative; overflow: hidden; padding: 2rem;">
+            <div style="position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: var(--accent-cyan);"></div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span style="font-size: 0.82rem; font-weight: 800; color: var(--accent-cyan); letter-spacing: 1.5px; text-transform: uppercase;">
+                    Recommended Next Action
+                </span>
+                <span style="background: rgba(99, 102, 241, 0.15); color: #818CF8; font-size: 0.78rem; font-weight: 750; padding: 0.25rem 0.75rem; border-radius: 999px;">
+                    {{ current_skill.phase_display }}
+                </span>
+            </div>
+
+            <h4 style="font-size: 1.6rem; color: #fff; margin: 0 0 0.5rem 0; font-weight: 750;">
+                {{ current_skill.name }}
+            </h4>
+            <p style="color: #cbd5e1; margin-bottom: 1.5rem; line-height: 1.6; font-size: 0.98rem; max-width: 720px;">
+                {{ current_skill.importance|default:current_skill.description }}
+            </p>
+
+            <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                <a href="{% url 'learning' pk=current_skill.pk %}" class="btn-primary" style="padding: 0.85rem 2.25rem; font-size: 1rem;">
+                    Continue Learning &rarr;
+                </a>
+                {% if current_tier_unlocked %}
+                <a href="{% url 'project' pk=goal.pk %}" class="btn-secondary" style="font-size: 0.9rem;">
+                    🛠️ Open {{ goal.chosen_tier }} Stage Project
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Curriculum & Learning Gates -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <div>
+                <h3 style="font-size: 1.45rem; font-weight: 800; margin: 0; color: #fff; letter-spacing: -0.5px;">
+                    Curriculum &amp; Learning Gates
+                </h3>
+                <p style="margin: 0.25rem 0 0 0; color: var(--text-muted); font-size: 0.88rem;">
+                    Complete each concept quiz and practice drill to advance. Gates enforce solid foundations.
+                </p>
+            </div>
+        </div>
+
+        {% if goal.skill_nodes.all %}
+            <div id="course-tiers" style="display: flex; flex-direction: column; gap: 1.25rem;">
+                {% for tier_section in tier_sections %}
+                <div class="tier-section" style="background: rgba(13, 18, 34, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 0.85rem;">
+                        <span style="font-size: 1.15rem; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 1px;">
+                            {{ tier_section.name }} Tier <span style="font-size: 0.82rem; color: var(--text-muted); text-transform: none;">(Levels {{ tier_section.first_level }}–{{ tier_section.last_level }})</span>
+                        </span>
+                        <span class="stage-pill stage-pill-beginner">Active Tier</span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 0.85rem;">
+                        {% for node in tier_section.nodes %}
+                        <div class="level-node-card card" style="background: rgba(8, 12, 22, 0.85); border-left: 4px solid {% if node.is_completed %}#10b981{% elif node.is_locked %}#334155{% elif node.status == 'in_progress' %}var(--accent-cyan){% else %}var(--border-subtle){% endif %}; opacity: {% if node.is_locked %}0.75{% else %}1.0{% endif %};">
+                            
+                            <div style="max-width: 65%;">
+                                <div style="display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.35rem; flex-wrap: wrap;">
+                                    <span style="font-size: 0.78rem; font-weight: 800; color: {% if node.is_completed %}#10b981{% elif node.is_locked %}#64748b{% else %}var(--accent-cyan){% endif %}; text-transform: uppercase; letter-spacing: 1px;">
+                                        Level {{ node.coach_level|default:node.order }}:
+                                    </span>
+                                    <h4 style="margin: 0; font-size: 1.2rem; font-weight: 700; color: {% if node.is_locked %}#94a3b8{% elif node.status == 'in_progress' %}var(--accent-cyan){% else %}#fff{% endif %};">
+                                        {{ node.name }}
+                                    </h4>
+                                    {% if node.is_completed %}
+                                        <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 0.72rem; padding: 0.15rem 0.55rem; border-radius: 999px; font-weight: 800;">
+                                            MASTERED ⭐
+                                        </span>
+                                    {% elif node.status == 'in_progress' %}
+                                        <span style="background: rgba(0, 229, 255, 0.15); color: var(--accent-cyan); font-size: 0.72rem; padding: 0.15rem 0.55rem; border-radius: 999px; font-weight: 800;">
+                                            IN PROGRESS
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0 0 0.5rem 0; line-height: 1.5;">
+                                    {{ node.description }}
+                                </p>
+                                {% if node.dashboard_concepts %}
+                                <div style="color: #cbd5e1; font-size: 0.82rem; line-height: 1.5;">
+                                    <strong style="color: var(--text-muted);">Concepts:</strong> {{ node.dashboard_concepts|join:", " }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div style="flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 0.5rem;">
+                                {% if node.is_locked %}
+                                    <div style="text-align: right;">
+                                        <div style="display: inline-flex; align-items: center; gap: 0.4rem; color: #64748b; font-size: 0.82rem; font-weight: 700; background: rgba(255,255,255,0.03); border: 1px dashed rgba(255,255,255,0.15); padding: 0.4rem 0.85rem; border-radius: 8px;">
+                                            <span>🔒 Locked</span>
+                                        </div>
+                                        <div style="font-size: 0.72rem; color: #64748b; margin-top: 0.35rem;">
+                                            Complete Level {{ node.coach_level|default:node.order|add:"-1" }}
+                                        </div>
+                                    </div>
+                                {% elif node.status == 'in_progress' or node.status == 'not_started' %}
+                                    <a href="{% url 'learning' pk=node.pk %}" class="btn-primary" style="padding: 0.65rem 1.4rem; font-size: 0.88rem; text-decoration: none;">
+                                        {% if node.phase == 'assessment' %}Start Assessment &rarr;
+                                        {% elif node.phase == 'learning' %}Learn Concept &rarr;
+                                        {% elif node.phase == 'quiz' %}Take 5-Q Quiz &rarr;
+                                        {% elif node.phase == 'review' %}Review &amp; Retake &rarr;
+                                        {% else %}Start Level &rarr;{% endif %}
+                                    </a>
+                                {% elif node.status == 'completed' %}
+                                    <span style="color: #10b981; font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase;">Completed ✓</span>
+                                    <a href="{% url 'skill_map' pk=node.pk %}" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">Review Syllabus</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="card" style="text-align: center; padding: 4rem 2rem;">
+                <p style="font-size: 1.2rem; color: var(--text-muted); margin-bottom: 1.5rem;">Your learning path is getting ready. Refresh in a moment.</p>
+                <a href="{% url 'dashboard' pk=goal.pk %}" class="btn-primary">Refresh Dashboard</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- RIGHT SIDEBAR: AI MENTOR & PROGRESS -->
+    <div>
+        <div class="card" style="position: sticky; top: 100px; border-radius: var(--radius-lg); padding: 2rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.85rem; margin-bottom: 1.5rem;">
+                <span style="font-weight: 750; letter-spacing: 1.5px; text-transform: uppercase; font-size: 0.82rem; color: var(--accent-cyan);">
+                    24/7 AI Course Mentor
+                </span>
+                <span style="color: #10b981; font-size: 0.75rem; font-weight: 750;">● Online</span>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div style="width: 80px; height: 80px; background: rgba(99, 102, 241, 0.12); border: 2px solid var(--accent-indigo); border-radius: 50%; margin: 0 auto; display: grid; place-items: center; font-size: 2.2rem; box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);">
+                    👨‍🏫
+                </div>
+                <h4 style="margin: 1rem 0 0.25rem 0; font-size: 1.2rem; color: #fff; font-weight: 800;">{{ goal.expert_agent_name }}</h4>
+                <p style="color: var(--accent-cyan); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; margin: 0;">TASBI AI SOLUTIONS</p>
+            </div>
+
+            <p style="font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); text-align: center; margin-bottom: 1.5rem;">
+                Stuck on a concept, formula, or code bug? Ask your mentor anytime for a breakdown.
+            </p>
+
+            <button onclick="document.getElementById('chat-modal').style.display='flex'" class="btn-primary" style="display: block; width: 100%; box-sizing: border-box; padding: 0.85rem; font-size: 0.95rem; border-radius: 10px;">
+                💬 Ask Your Mentor
+            </button>
+
+            <!-- Quick Prompts -->
+            <div style="margin-top: 1rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                <button onclick="openChatWithPrompt('Explain this simpler with an everyday analogy')" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; padding: 0.55rem 0.85rem; border-radius: 8px; font-size: 0.8rem; text-align: left; cursor: pointer;">
+                    💡 Explain simpler with an everyday analogy
+                </button>
+                <button onclick="openChatWithPrompt('What are the most common beginner pitfalls in {{ goal.goal|escapejs }} and how to avoid them?')" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; padding: 0.55rem 0.85rem; border-radius: 8px; font-size: 0.8rem; text-align: left; cursor: pointer;">
+                    ⚠️ What common pitfalls should I avoid?
+                </button>
+                <button onclick="openChatWithPrompt('Give me a hands-on real world scenario to practice for my current level in {{ goal.goal|escapejs }}')" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); color: #cbd5e1; padding: 0.55rem 0.85rem; border-radius: 8px; font-size: 0.8rem; text-align: left; cursor: pointer;">
+                    🛠️ Give me a practical practice scenario
+                </button>
+            </div>
+
+            <!-- Progress Meter -->
+            <div style="margin-top: 2rem; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-size: 0.85rem;">
+                    <span style="color: var(--text-muted); font-weight: 700; text-transform: uppercase;">Stage Progress</span>
+                    <span style="color: var(--accent-cyan); font-weight: 850;">{{ goal.progress_percentage }}%</span>
+                </div>
+                <div style="background: rgba(255, 255, 255, 0.05); height: 8px; border-radius: 4px; overflow: hidden;">
+                    <div style="width: {{ goal.progress_percentage }}%; background: var(--gradient-primary); height: 100%; box-shadow: 0 0 10px var(--accent-cyan);"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mentor Chat Modal -->
+<div id="chat-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+    <div class="card" style="width: 100%; max-width: 640px; margin: 5vh auto; height: 80vh; display: flex; flex-direction: column; border: 1px solid rgba(0, 229, 255, 0.35); border-radius: 20px; box-shadow: 0 25px 60px rgba(0,0,0,0.8);">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1rem;">
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 1.6rem;">👨‍🏫</span>
+                <div>
+                    <h3 style="margin: 0; font-size: 1.15rem; color: #fff;">{{ goal.expert_agent_name }}</h3>
+                    <span style="font-size: 0.75rem; color: #10b981;">● Online 24/7 • Instant Guidance</span>
+                </div>
+            </div>
+            <button onclick="document.getElementById('chat-modal').style.display='none'" style="background: transparent; border: none; color: #94a3b8; font-size: 1.8rem; cursor: pointer; line-height: 1;">&times;</button>
+        </div>
+
+        <div id="chat-history" style="flex: 1; overflow-y: auto; padding: 1.25rem 0; display: flex; flex-direction: column; gap: 1rem;">
+            <div style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); padding: 1.1rem; border-radius: 12px; align-self: flex-start; max-width: 88%; line-height: 1.6; color: #e2e8f0; font-size: 0.95rem;">
+                👋 Hi {{ goal.user_name }}! What are you working through in <strong>{{ goal.goal|title }}</strong>? Ask me any question, code snippet, or conceptual dilemma and we'll solve it together.
+            </div>
+        </div>
+
+        <div style="border-top: 1px solid var(--border-subtle); padding-top: 1rem; display: flex; gap: 0.75rem;">
+            <input type="text" id="chat-input" class="form-input" style="margin-bottom: 0; border-radius: 10px;" placeholder="Ask your mentor anything (e.g. explain XLOOKUP simply, or SQL JOINs)..." onkeydown="if(event.key==='Enter') sendChatMessage()">
+            <button onclick="sendChatMessage()" class="btn-primary" style="padding: 0 1.75rem; border-radius: 10px; font-size: 0.95rem; flex-shrink: 0;">Send</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openChatWithPrompt(promptText) {
+        document.getElementById('chat-modal').style.display = 'flex';
+        document.getElementById('chat-input').value = promptText;
+        sendChatMessage();
+    }
+
+    function sendChatMessage() {
+        const input = document.getElementById('chat-input');
+        const message = input.value.trim();
+        if (!message) return;
+
+        const history = document.getElementById('chat-history');
+
+        // Append user bubble
+        const userBubble = document.createElement('div');
+        userBubble.style.cssText = 'background: rgba(0, 229, 255, 0.12); border: 1px solid rgba(0, 229, 255, 0.3); padding: 0.9rem 1.1rem; border-radius: 12px; align-self: flex-end; max-width: 85%; color: #fff; font-size: 0.95rem; line-height: 1.5;';
+        userBubble.textContent = message;
+        history.appendChild(userBubble);
+        input.value = '';
+        history.scrollTop = history.scrollHeight;
+
+        // Typing indicator
+        const typingBubble = document.createElement('div');
+        typingBubble.style.cssText = 'background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); padding: 0.75rem 1rem; border-radius: 12px; align-self: flex-start; color: var(--accent-cyan); font-size: 0.85rem;';
+        typingBubble.textContent = 'Thinking...';
+        history.appendChild(typingBubble);
+        history.scrollTop = history.scrollHeight;
+
+        fetch("{% url 'expert_chat' pk=goal.pk %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ message: message, panel: 'teacher' })
+        })
+        .then(res => res.json())
+        .then(data => {
+            history.removeChild(typingBubble);
+            const mentorBubble = document.createElement('div');
+            mentorBubble.style.cssText = 'background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); padding: 1.1rem; border-radius: 12px; align-self: flex-start; max-width: 88%; line-height: 1.6; color: #e2e8f0; font-size: 0.95rem; white-space: pre-line;';
+            mentorBubble.textContent = data.reply || data.response || "I am right here with you. Let's break down this concept step by step!";
+            history.appendChild(mentorBubble);
+            history.scrollTop = history.scrollHeight;
+        })
+        .catch(err => {
+            history.removeChild(typingBubble);
+            const errBubble = document.createElement('div');
+            errBubble.style.cssText = 'background: rgba(239, 68, 68, 0.12); border: 1px solid #ef4444; padding: 0.9rem; border-radius: 12px; align-self: flex-start; color: #fca5a5; font-size: 0.9rem;';
+            errBubble.textContent = "Your mentor is reviewing your question. In the meantime, continue with the current lesson step!";
+            history.appendChild(errBubble);
+        });
+    }
+</script>
+{% endblock %}

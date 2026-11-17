@@ -1,0 +1,491 @@
+{% extends 'base.html' %}
+{% block title %}{{ brief.title|default:"Stage Project" }} — {{ brief.stage|default:selected_stage }} Project — EXA AI HUB{% endblock %}
+
+{% block extra_head %}
+<style>
+    .buildlab-shell { max-width: 1180px; margin: 0 auto; padding: 1.5rem 1rem 5rem; }
+    .buildlab-topbar { display:flex; justify-content:space-between; align-items:center; gap:1rem; margin-bottom:1.5rem; flex-wrap:wrap; }
+    .buildlab-back { color:#94a3b8; text-decoration:none; font-weight:600; display:inline-flex; align-items:center; gap:0.5rem; transition:color 0.2s; }
+    .buildlab-back:hover { color:var(--accent-cyan); }
+    .buildlab-chips { display:flex; flex-wrap:wrap; gap:.6rem; }
+    .buildlab-chip { border:1px solid rgba(148,163,184,.25); border-radius:999px; padding:.45rem .85rem; color:#dbeafe; background:rgba(15,23,42,.7); font-size:.82rem; font-weight:700; }
+    
+    /* 3-Stage Project Switcher Tabs */
+    .stage-switcher-container { margin-bottom: 2rem; background: rgba(15,23,42,0.85); border: 1px solid rgba(148,163,184,0.18); border-radius: 16px; padding: 0.5rem; }
+    .stage-switcher { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    .stage-tab { display: flex; flex-direction: column; padding: 0.85rem 1.25rem; border-radius: 12px; text-decoration: none; border: 1px solid transparent; transition: all 0.2s ease; background: transparent; }
+    .stage-tab:hover { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.08); }
+    .stage-tab.is-active { background: linear-gradient(135deg, rgba(0,229,255,0.12), rgba(99,102,241,0.12)); border: 1px solid rgba(0,229,255,0.4); box-shadow: 0 4px 20px rgba(0,229,255,0.1); }
+    .stage-tab-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.25rem; }
+    .stage-tab-badge { font-size: 0.72rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.15rem 0.55rem; border-radius: 999px; }
+    .badge-beginner { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-intermediate { background: rgba(0,229,255,0.15); color: #67e8f9; border: 1px solid rgba(0,229,255,0.3); }
+    .badge-advanced { background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+    .stage-tab-title { color: #f8fafc; font-weight: 700; font-size: 0.95rem; margin: 0; line-height: 1.3; }
+    .stage-tab-sub { color: #94a3b8; font-size: 0.78rem; margin-top: 0.2rem; }
+    
+    .buildlab-card { background:linear-gradient(145deg,rgba(17,24,39,.96),rgba(11,15,25,.96)); border:1px solid rgba(148,163,184,.18); border-radius:20px; padding:clamp(1.25rem,3vw,2.25rem); margin-bottom:1.5rem; box-shadow:0 18px 48px rgba(0,0,0,.16); }
+    .buildlab-hero { border-top:4px solid var(--accent-cyan); padding-top:2rem; position:relative; overflow:hidden; }
+    .buildlab-hero::before { content:''; position:absolute; top:-100px; right:-100px; width:300px; height:300px; background:radial-gradient(circle, rgba(0,229,255,0.08) 0%, transparent 70%); pointer-events:none; }
+    .buildlab-eyebrow { color:var(--accent-cyan); text-transform:uppercase; letter-spacing:.14em; font-size:.78rem; font-weight:800; margin:0 0 .7rem; display:flex; align-items:center; gap:0.5rem; }
+    .buildlab-title { color:#f8fafc; font-size:clamp(1.9rem,4.5vw,2.9rem); line-height:1.15; letter-spacing:-.03em; margin:0 0 0.85rem; font-weight:800; }
+    .buildlab-lede { color:#cbd5e1; font-size:1.05rem; line-height:1.75; max-width:85ch; margin:0 0 1.25rem; }
+    .buildlab-meta-pills { display:flex; flex-wrap:wrap; gap:0.6rem; align-items:center; }
+    .buildlab-meta-pill { display:inline-flex; align-items:center; gap:0.4rem; padding:0.35rem 0.75rem; border-radius:8px; font-size:0.82rem; font-weight:600; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); color:#cbd5e1; }
+    
+    .buildlab-section-title { color:#f8fafc; font-size:1.3rem; margin:0 0 .45rem; font-weight:700; display:flex; align-items:center; gap:0.65rem; }
+    .buildlab-section-note { color:#94a3b8; margin:0 0 1.25rem; line-height:1.65; font-size:0.92rem; }
+    
+    /* Overview Split Grid */
+    .buildlab-split-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:1.25rem; margin-bottom:1.5rem; }
+    .buildlab-highlight-box { background:rgba(2,6,23,0.5); border:1px solid rgba(148,163,184,0.15); border-radius:14px; padding:1.25rem; }
+    .buildlab-highlight-box h3 { color:var(--text-main); font-size:1rem; margin:0 0 0.6rem; font-weight:700; display:flex; align-items:center; gap:0.5rem; }
+    .buildlab-highlight-box p { color:#cbd5e1; font-size:0.92rem; line-height:1.65; margin:0; }
+    .buildlab-highlight-box ul { margin:0; padding-left:1.2rem; color:#cbd5e1; font-size:0.9rem; line-height:1.6; }
+    
+    .buildlab-task { color:#e2e8f0; font-size:1rem; line-height:1.75; white-space:pre-line; padding:1.25rem; border-left:3px solid var(--accent-cyan); background:rgba(34,211,238,.05); border-radius:0 12px 12px 0; }
+    .buildlab-schema { color:#cbd5e1; font-size:0.92rem; line-height:1.75; white-space:pre-line; background:rgba(2,6,23,.55); padding:1.25rem; border:1px solid rgba(148,163,184,.15); border-radius:12px; overflow-wrap:anywhere; font-family:Consolas, 'Courier New', monospace; }
+    
+    /* Implementation Steps */
+    .buildlab-steps { display:grid; gap:0.85rem; margin:0; padding:0; list-style:none; }
+    .buildlab-step-item { display:grid; grid-template-columns:auto 1fr; gap:1rem; align-items:start; padding:1.1rem 1.25rem; background:rgba(2,6,23,0.42); border:1px solid rgba(148,163,184,0.14); border-radius:14px; color:#e2e8f0; line-height:1.65; }
+    .buildlab-step-badge { width:2.2rem; height:2.2rem; border-radius:50%; background:linear-gradient(135deg, rgba(99,102,241,0.2), rgba(0,229,255,0.2)); border:1px solid var(--accent-cyan); color:var(--accent-cyan); font-weight:800; font-size:0.9rem; display:grid; place-items:center; }
+    .buildlab-step-text strong { display:block; color:#f8fafc; font-size:0.95rem; margin-bottom:0.2rem; }
+    .buildlab-step-text span { color:#94a3b8; font-size:0.88rem; }
+    
+    /* Requirements Checklist */
+    .buildlab-requirements { list-style:none; margin:0; padding:0; display:grid; gap:0.85rem; }
+    .buildlab-requirements li { display:grid; grid-template-columns:2.5rem 1fr; gap:1rem; align-items:start; padding:1.1rem 1.25rem; background:rgba(2,6,23,.42); border:1px solid rgba(148,163,184,.14); border-radius:14px; color:#e2e8f0; line-height:1.7; }
+    .buildlab-number { display:grid; place-items:center; width:2.35rem; height:2.35rem; border-radius:50%; background:rgba(34,211,238,.12); color:#67e8f9; font-weight:800; font-size:0.9rem; }
+    
+    /* Rubric 4x25 Grid */
+    .rubric-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:1rem; margin-top:1rem; }
+    .rubric-card { background:rgba(2,6,23,0.5); border:1px solid rgba(148,163,184,0.15); border-radius:14px; padding:1.25rem; position:relative; }
+    .rubric-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem; }
+    .rubric-name { color:#f8fafc; font-weight:700; font-size:0.95rem; margin:0; }
+    .rubric-weight { background:rgba(0,229,255,0.15); color:var(--accent-cyan); font-weight:800; font-size:0.75rem; padding:0.2rem 0.55rem; border-radius:999px; }
+    .rubric-desc { color:#94a3b8; font-size:0.85rem; line-height:1.55; margin:0; }
+    
+    .buildlab-meta-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+    .buildlab-meta { padding:1.1rem 1.2rem; border-radius:13px; background:rgba(2,6,23,.42); border:1px solid rgba(148,163,184,.14); }
+    .buildlab-meta strong { display:block; color:#94a3b8; text-transform:uppercase; font-size:.72rem; letter-spacing:.12em; margin-bottom:.45rem; }
+    .buildlab-meta span { color:#e2e8f0; line-height:1.6; }
+    
+    .buildlab-deliverables { display:flex; flex-wrap:wrap; gap:.65rem; }
+    .buildlab-deliverable { border-radius:10px; border:1px solid rgba(34,211,238,.2); background:rgba(34,211,238,.07); color:#cffafe; padding:.7rem .9rem; font-size:.9rem; line-height:1.45; }
+    
+    .upload-panel { border:1px solid rgba(34,211,238,.34); background:linear-gradient(145deg,rgba(8,47,73,.38),rgba(15,23,42,.92)); }
+    .upload-form { display:grid; gap:1.35rem; }
+    .upload-drop { display:grid; place-items:center; min-height:180px; padding:1.5rem; text-align:center; border:2px dashed rgba(103,232,249,.45); border-radius:16px; background:rgba(2,6,23,.36); cursor:pointer; transition:border-color .2s,background .2s; }
+    .upload-drop:hover,.upload-drop:focus-within { border-color:#67e8f9; background:rgba(8,145,178,.12); }
+    .upload-drop input { display:block; max-width:100%; margin:1rem auto 0; color:#cbd5e1; }
+    .upload-drop-title { color:#f8fafc; font-size:1.05rem; font-weight:750; }
+    .upload-help { display:block; color:#94a3b8; font-size:.85rem; line-height:1.55; margin-top:.45rem; }
+    .upload-fields { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; }
+    .upload-field { display:grid; gap:.55rem; color:#e2e8f0; font-weight:650; }
+    .upload-field input { width:100%; box-sizing:border-box; min-height:3.2rem; padding:.85rem 1rem; border-radius:11px; color:#f8fafc; background:#080d18; border:1px solid rgba(148,163,184,.3); }
+    .upload-field input:focus { outline:2px solid #22d3ee; outline-offset:2px; }
+    .upload-submit { width:100%; min-height:3.6rem; border:0; border-radius:12px; color:#04131b; background:linear-gradient(100deg,#67e8f9,#5eead4); font-size:1rem; font-weight:850; cursor:pointer; transition:filter 0.2s, transform 0.2s; }
+    .upload-submit:hover { filter:brightness(1.08); transform: translateY(-1px); }
+    
+    .buildlab-history { display:grid; gap:.8rem; margin:0; padding:0; list-style:none; }
+    .buildlab-history li { display:flex; align-items:center; justify-content:space-between; gap:1rem; padding:1rem 1.1rem; border:1px solid rgba(148,163,184,.15); background:rgba(2,6,23,.38); border-radius:12px; color:#cbd5e1; flex-wrap:wrap; }
+    .buildlab-history a { color:#67e8f9; font-weight:700; text-decoration:none; }
+    
+    @media (max-width:850px) {
+        .stage-switcher { grid-template-columns: 1fr; }
+        .buildlab-split-grid { grid-template-columns: 1fr; }
+        .buildlab-topbar { align-items:flex-start; flex-direction:column; }
+        .buildlab-meta-grid,.upload-fields { grid-template-columns:1fr; }
+        .buildlab-requirements li { grid-template-columns:2.25rem 1fr; gap:.8rem; padding:1rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="buildlab-shell">
+
+    <!-- Top Navigation Bar -->
+    <nav class="buildlab-topbar" aria-label="Build Lab navigation">
+        <a class="buildlab-back" href="{% url 'dashboard' pk=goal.pk %}">
+            &larr; Back to Dashboard & Learning Gates
+        </a>
+        <div class="buildlab-chips">
+            <span class="buildlab-chip">{{ brief.domain|default:goal.domain|capfirst }}</span>
+            <span class="buildlab-chip">{{ brief.stage|default:selected_stage }} Stage</span>
+            <span class="buildlab-chip">3-Stage Project System</span>
+        </div>
+    </nav>
+
+    <!-- Three-Stage Project System Switcher Tabs -->
+    <div class="stage-switcher-container">
+        <div style="padding: 0.6rem 0.85rem 0.3rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 0.5rem;">
+            <span style="color: var(--accent-cyan); font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em;">
+                Domain Projects · {{ brief.domain|default:goal.domain|capfirst }} (3 Stages)
+            </span>
+            <span style="color: var(--text-muted); font-size: 0.78rem;">
+                Select a stage to view project requirements
+            </span>
+        </div>
+        <div class="stage-switcher">
+            {% for s in stage_summaries %}
+            <a href="?stage={{ s.stage }}" class="stage-tab {% if selected_stage == s.stage %}is-active{% endif %}">
+                <div class="stage-tab-header">
+                    <span class="stage-tab-badge {% if s.stage == 'Beginner' %}badge-beginner{% elif s.stage == 'Intermediate' %}badge-intermediate{% else %}badge-advanced{% endif %}">
+                        Stage {{ forloop.counter }} · {{ s.stage }}
+                    </span>
+                    {% if s.is_completed %}
+                    <span style="color: #34d399; font-size: 0.75rem; font-weight: 700;">✅ Mastered</span>
+                    {% elif s.is_unlocked %}
+                    <span style="color: var(--accent-cyan); font-size: 0.75rem; font-weight: 700;">🔓 Unlocked</span>
+                    {% else %}
+                    <span style="color: #94a3b8; font-size: 0.75rem; font-weight: 700;">🔒 Locked</span>
+                    {% endif %}
+                </div>
+                <h4 class="stage-tab-title">
+                    {{ s.display_title }}
+                </h4>
+                <span class="stage-tab-sub">
+                    {% if s.is_completed %}Completed (Score: {{ s.score }}/100){% elif s.is_unlocked %}Ready for build lab{% else %}{{ s.completed_lessons }}/{{ s.total_lessons }} lessons complete{% endif %}
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if is_locked %}
+    <!-- Locked Stage Gate -->
+    <section class="buildlab-card" style="border: 2px dashed rgba(239, 68, 68, 0.4); background: linear-gradient(145deg, rgba(20, 24, 39, 0.96), rgba(11, 15, 25, 0.96)); text-align: center; padding: 3.5rem 1.5rem; margin-top: 1rem;">
+        <div style="width: 76px; height: 76px; border-radius: 50%; background: rgba(239, 68, 68, 0.12); border: 2px solid rgba(239, 68, 68, 0.4); display: grid; place-items: center; font-size: 2.2rem; margin: 0 auto 1.5rem;">
+            🔒
+        </div>
+        <p style="color: #f87171; text-transform: uppercase; letter-spacing: 0.15em; font-size: 0.82rem; font-weight: 800; margin: 0 0 0.5rem;">
+            STAGE PROJECT GATED · TASBI AI SOLUTIONS
+        </p>
+        <h2 style="color: #fff; font-size: clamp(1.8rem, 4vw, 2.5rem); margin: 0 0 1rem; font-weight: 800; letter-spacing: -0.02em;">
+            {{ selected_stage }} Stage Project is Locked
+        </h2>
+        <p style="color: #cbd5e1; max-width: 650px; margin: 0 auto 2rem; line-height: 1.7; font-size: 1.05rem;">
+            To ensure real-world problem-solving competency, EXA AI HUB unlocks projects only after you complete all <strong>{{ selected_stage }}</strong> stage lessons, practice exercises, and topic quizzes.
+        </p>
+
+        <div style="max-width: 520px; margin: 0 auto 2.5rem; background: rgba(2, 6, 23, 0.6); border: 1px solid rgba(148, 163, 184, 0.15); border-radius: 16px; padding: 1.5rem; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem;">
+                <span style="color: #fff; font-weight: 700; font-size: 0.95rem;">Stage Learning Progress</span>
+                <span style="color: var(--accent-cyan); font-weight: 800; font-size: 0.9rem;">
+                    {{ stage_summary.completed_lessons }} of {{ stage_summary.total_lessons }} Lessons Mastered
+                </span>
+            </div>
+            <div style="height: 8px; width: 100%; background: rgba(148, 163, 184, 0.2); border-radius: 999px; overflow: hidden; margin-bottom: 1.25rem;">
+                <div style="height: 100%; width: {{ stage_summary.progress_percent }}%; background: linear-gradient(90deg, var(--accent-cyan), #6366f1); border-radius: 999px;"></div>
+            </div>
+
+            {% if stage_summary.pending_nodes %}
+            <p style="color: #94a3b8; font-size: 0.82rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 0.75rem;">
+                Required Lessons to Complete:
+            </p>
+            <ul style="list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem;">
+                {% for node in stage_summary.pending_nodes %}
+                <li style="display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0.85rem; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(148, 163, 184, 0.1); border-radius: 8px;">
+                    <span style="color: #e2e8f0; font-size: 0.88rem; font-weight: 600;">
+                        {{ node.name }}
+                    </span>
+                    <a href="{% url 'learning' pk=node.pk %}" style="color: var(--accent-cyan); font-size: 0.8rem; font-weight: 700; text-decoration: none;">
+                        Start Lesson &rarr;
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        </div>
+
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <a href="{% url 'dashboard' pk=goal.pk %}" class="btn-primary" style="padding: 0.85rem 2.25rem; font-size: 1rem;">
+                ▶️ Return to Dashboard &amp; Continue Learning
+            </a>
+        </div>
+    </section>
+    {% else %}
+    <!-- Main Project Hero Card -->
+    <section class="buildlab-card buildlab-hero">
+        <p class="buildlab-eyebrow">
+            <span>🛡️</span> EXA BUILD LAB · {{ brief.stage|default:selected_stage|upper }} STAGE PROJECT
+        </p>
+        <h1 class="buildlab-title">{{ brief.title|default:"Stage Project" }}</h1>
+        <p class="buildlab-lede">
+            {{ brief.tagline|default:brief.company_context|default:brief.objective|default:"" }}
+        </p>
+
+        <div class="buildlab-meta-pills">
+            <div class="buildlab-meta-pill">
+                <span>⚡ Difficulty:</span>
+                <strong style="color: var(--accent-cyan);">{{ brief.difficulty|default:"Practical" }}</strong>
+            </div>
+            <div class="buildlab-meta-pill">
+                <span>⏱️ Estimated Duration:</span>
+                <strong style="color: #cbd5e1;">{{ brief.estimated_duration|default:brief.deadline|default:"3-5 days" }}</strong>
+            </div>
+            <div class="buildlab-meta-pill">
+                <span>🎯 Mastery Passing Score:</span>
+                <strong style="color: #34d399;">75 / 100 Points</strong>
+            </div>
+            <div class="buildlab-meta-pill">
+                <span>📋 Rubric Criteria:</span>
+                <strong style="color: #c084fc;">4 Pillars (25 pts each)</strong>
+            </div>
+        </div>
+    </section>
+
+    <!-- What You Will Build & What You Will Learn -->
+    <div class="buildlab-split-grid">
+        <div class="buildlab-highlight-box">
+            <h3><span>🏗️</span> What You Will Build</h3>
+            <p>{{ brief.what_you_will_build|default:brief.task|default:brief.objective|default:"" }}</p>
+        </div>
+        <div class="buildlab-highlight-box">
+            <h3><span>🧠</span> What You Will Learn & Master</h3>
+            {% if brief.what_you_will_learn %}
+            <ul>
+                {% for item in brief.what_you_will_learn %}
+                <li>{{ item }}</li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>{{ brief.objective|default:"End-to-end practical engineering competencies, error-handling patterns, and portfolio deliverable." }}</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Detailed Task & Industry Context -->
+    <section class="buildlab-card">
+        <h2 class="buildlab-section-title"><span>📋</span> Project Scope & Industry Context</h2>
+        <p class="buildlab-section-note">
+            {{ brief.company_context|default:brief.objective|default:"" }}
+        </p>
+        <div class="buildlab-task">{{ brief.task|default:"" }}</div>
+    </section>
+
+    <!-- Starter Materials & Schema -->
+    {% if brief.access_details or brief.dataset_schema %}
+    <section class="buildlab-card">
+        <h2 class="buildlab-section-title"><span>📦</span> Starter Materials & Data Schema</h2>
+        <p class="buildlab-section-note">
+            Use the supplied public or synthetic starter materials. Follow this schema as your structural contract.
+        </p>
+        {% if brief.access_details %}
+        <div style="margin-bottom: 1rem;">
+            <strong style="color: var(--accent-cyan); font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">Provided Access & Template:</strong>
+            <div class="buildlab-schema">{{ brief.access_details|default:"" }}</div>
+        </div>
+        {% endif %}
+        {% if brief.dataset_schema %}
+        <div>
+            <strong style="color: var(--accent-cyan); font-size: 0.88rem; display: block; margin-bottom: 0.35rem;">Schema Contract:</strong>
+            <div class="buildlab-schema">{{ brief.dataset_schema|default:"" }}</div>
+        </div>
+        {% endif %}
+    </section>
+    {% endif %}
+
+    <!-- Step-by-Step Implementation Guide -->
+    {% if brief.implementation_steps %}
+    <section class="buildlab-card">
+        <h2 class="buildlab-section-title"><span>🚀</span> Step-by-Step Implementation Guide</h2>
+        <p class="buildlab-section-note">Follow these sequential milestones to implement the system cleanly from scratch.</p>
+        <ol class="buildlab-steps">
+            {% for step in brief.implementation_steps %}
+            <li class="buildlab-step-item">
+                <span class="buildlab-step-badge">{{ forloop.counter }}</span>
+                <div class="buildlab-step-text">
+                    <strong>Milestone {{ forloop.counter }}</strong>
+                    <span>{{ step }}</span>
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+    </section>
+    {% endif %}
+
+    <!-- Numbered Requirements Checklist -->
+    <section class="buildlab-card">
+        <h2 class="buildlab-section-title"><span>✅</span> Mandatory Requirements Checklist</h2>
+        <p class="buildlab-section-note">
+            Complete all {{ brief.requirements_list|length }} requirements. The AI Project Scanner will verify each point against your submitted code and report.
+        </p>
+        <ol class="buildlab-requirements">
+            {% for requirement in brief.requirements_list %}
+            <li>
+                <span class="buildlab-number">{{ forloop.counter }}</span>
+                <span>{{ requirement }}</span>
+            </li>
+            {% endfor %}
+        </ol>
+    </section>
+
+    <!-- Expected Output & Verification Check -->
+    {% if brief.expected_output %}
+    <section class="buildlab-card">
+        <h2 class="buildlab-section-title"><span>🎯</span> Expected Output & Verification Criteria</h2>
+        <p class="buildlab-section-note">
+            Your final deliverable must produce verifiable outcomes matching these standards.
+        </p>
+        <div style="background: rgba(16,185,129,0.08); border-left: 3px solid #10b981; padding: 1.25rem; border-radius: 0 12px 12px 0;">
+            <p style="margin: 0; color: #a7f3d0; font-size: 0.95rem; line-height: 1.7;">
+                {{ brief.expected_output|default:"" }}
+            </p>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Evaluation Rubric (4 Criteria x 25%) -->
+    <section class="buildlab-card">
+        <h2 class="buildlab-section-title"><span>⚖️</span> Evaluation Rubric (100 Points Total)</h2>
+        <p class="buildlab-section-note">
+            Submissions are rigorously graded across four core technical pillars. A total score of 75/100 or higher unlocks Stage Mastery.
+        </p>
+        <div class="rubric-grid">
+            <div class="rubric-card">
+                <div class="rubric-header">
+                    <span class="rubric-name">1. Architecture & Design</span>
+                    <span class="rubric-weight">25 Pts</span>
+                </div>
+                <p class="rubric-desc">Clean modular structure, adherence to engineering patterns, separation of concerns, and appropriate schema modeling.</p>
+            </div>
+            <div class="rubric-card">
+                <div class="rubric-header">
+                    <span class="rubric-name">2. Feature Completeness</span>
+                    <span class="rubric-weight">25 Pts</span>
+                </div>
+                <p class="rubric-desc">All numbered checklist requirements functioning correctly with evidence of end-to-end execution.</p>
+            </div>
+            <div class="rubric-card">
+                <div class="rubric-header">
+                    <span class="rubric-name">3. Robustness & Validation</span>
+                    <span class="rubric-weight">25 Pts</span>
+                </div>
+                <p class="rubric-desc">Defensive input sanitation, edge-case resilience, graceful exception handling, and error logging.</p>
+            </div>
+            <div class="rubric-card">
+                <div class="rubric-header">
+                    <span class="rubric-name">4. Docs & Presentation</span>
+                    <span class="rubric-weight">25 Pts</span>
+                </div>
+                <p class="rubric-desc">Clear README setup guide, annotated PDF report, architectural explanation, and clean repository history.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tools & Deadline Plan -->
+    <section class="buildlab-card">
+        <h2 class="buildlab-section-title"><span>🛠️</span> Recommended Tools & Timeline</h2>
+        <div class="buildlab-meta-grid">
+            <div class="buildlab-meta">
+                <strong>Recommended Tooling Stack</strong>
+                <span>{{ brief.tools|default:"Python 3.12+, Git, VS Code, Browser DevTools" }}</span>
+            </div>
+            <div class="buildlab-meta">
+                <strong>Suggested Completion Horizon</strong>
+                <span>{{ brief.deadline|default:"3-5 days of self-paced focused work" }}</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Deliverables Checklist -->
+    <section class="buildlab-card">
+        <h2 class="buildlab-section-title"><span>📁</span> What to Submit</h2>
+        <p class="buildlab-section-note">Prepare these deliverables before initiating the AI scan.</p>
+        <div class="buildlab-deliverables">
+            {% for item in brief.submission.items %}
+            <span class="buildlab-deliverable">✓ {{ item }}</span>
+            {% empty %}
+            <span class="buildlab-deliverable">✓ Detailed PDF Engineering Report</span>
+            <span class="buildlab-deliverable">✓ Public GitHub Repository URL with README</span>
+            <span class="buildlab-deliverable">✓ Functional Live Demo / Simulation URL</span>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Latest Project Status Banner (if evaluated) -->
+    {% if project.status == 'Completed' or project.status == 'Needs Revision' %}
+    <section class="buildlab-card" aria-live="polite" style="border-left: 4px solid {% if project.status == 'Completed' %}#10b981{% else %}#f59e0b{% endif %};">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h2 class="buildlab-section-title" style="margin: 0;">
+                Latest Submission Status: <span style="color: {% if project.status == 'Completed' %}#34d399{% else %}#fbbf24{% endif %};">{{ project.status }}</span>
+            </h2>
+            <span style="font-size: 1.25rem; font-weight: 800; color: #f8fafc; background: rgba(0,0,0,0.4); padding: 0.25rem 0.75rem; border-radius: 8px;">
+                {{ project.score }}/100 Pts
+            </span>
+        </div>
+        <p class="buildlab-section-note" style="margin: 0; color: #cbd5e1;">{{ project.feedback }}</p>
+    </section>
+    {% endif %}
+
+    <!-- Portfolio Submission Form Panel -->
+    <section class="buildlab-card upload-panel" id="upload-portfolio">
+        <p class="buildlab-eyebrow">
+            <span>📤</span> PORTFOLIO SUBMISSION ENGINE
+        </p>
+        <h2 class="buildlab-title" style="font-size:clamp(1.7rem,4vw,2.3rem);">Submit Your Project for AI Evaluation</h2>
+        <p class="buildlab-section-note">
+            Upload your technical PDF report and provide your repository link. Our automated evaluator scans your codebase, verifies requirements evidence, and computes your rubric score in seconds.
+        </p>
+
+        <form class="upload-form" method="POST" enctype="multipart/form-data" action="{% url 'project_submission_upload' pk=project.pk %}">
+            {% csrf_token %}
+            
+            <label class="upload-drop">
+                <span class="upload-drop-title">📄 Choose or Drag & Drop Your PDF Report</span>
+                <span class="upload-help">PDF format only · Maximum 10 MB · Mandatory</span>
+                <input type="file" name="report" accept="application/pdf,.pdf" required>
+            </label>
+
+            <div class="upload-fields">
+                <label class="upload-field">
+                    <span>🐙 GitHub Repository URL (Required)</span>
+                    <input type="url" name="github_url" placeholder="https://github.com/username/project-repo" required>
+                </label>
+                <label class="upload-field">
+                    <span>🌐 Live Demo / Simulator URL {% if live_demo_required %}(Required){% else %}(Optional){% endif %}</span>
+                    <input type="url" name="live_url" placeholder="https://demo.example.com" {% if live_demo_required %}required{% endif %}>
+                </label>
+            </div>
+
+            <label class="upload-drop" style="min-height: 120px; padding: 1rem;">
+                <span class="upload-drop-title">🎥 Video Walkthrough (Optional)</span>
+                <span class="upload-help">MP4 or WebM · Max 100 MB · Under 5 minutes</span>
+                <input type="file" name="video" accept="video/mp4,video/webm,.mp4,.webm">
+            </label>
+
+            <button class="upload-submit" type="submit">
+                ⚡ Submit Project for Instant AI Evaluation &rarr;
+            </button>
+        </form>
+    </section>
+
+    <!-- Submission History -->
+    {% if submissions %}
+    <section class="buildlab-card">
+        <h2 class="buildlab-section-title"><span>🕒</span> Submission & Evaluation History</h2>
+        <ul class="buildlab-history">
+            {% for submission in submissions %}
+            <li>
+                <div>
+                    <strong style="color: #f8fafc; display: block; font-size: 0.95rem;">
+                        {{ submission.created_at|date:"M j, Y · H:i" }}
+                    </strong>
+                    <span style="color: {% if submission.score >= 75 %}#34d399{% else %}#fbbf24{% endif %}; font-size: 0.85rem; font-weight: 600;">
+                        Status: {{ submission.status|title }} · Score: {{ submission.score|default:0 }}/100
+                    </span>
+                </div>
+                <a href="{% url 'submission_result' pk=submission.pk %}" style="background: rgba(0,229,255,0.1); border: 1px solid rgba(0,229,255,0.3); padding: 0.4rem 0.85rem; border-radius: 8px;">
+                    View Detailed Score Report &rarr;
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+    {% endif %}
+
+{% endif %}
+</main>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+{% block title %}Skill Map — {{ skill.name }} — EXA{% endblock %}
+
+{% block extra_head %}
+<style>
+    .chapter-page { max-width:900px; margin:0 auto; padding:1rem 0 2rem; }
+    .chapter-path { display:flex; flex-direction:column; gap:.7rem; margin-bottom:1.5rem; }
+    .chapter-card { padding:1rem 1.1rem !important; }
+    .chapter-card h3 { font-size:1rem !important; }
+    @media(max-width:620px) { .chapter-card > div { flex-direction:column !important; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chapter-page">
+
+    <!-- Top Navigation -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <a href="{% url 'dashboard' pk=goal.pk %}" style="color: var(--text-muted); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.2s;" onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='var(--text-muted)'">
+            &larr; Back to Dashboard
+        </a>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <span style="background: rgba(0, 229, 255, 0.15); border: 1px solid rgba(0, 229, 255, 0.3); color: var(--accent-cyan); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                Phase 2: Master Skill Map
+            </span>
+            <button id="voice-btn" class="btn-primary" style="background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 0.4rem 0.9rem; font-size: 0.85rem; border-radius: 8px; cursor: pointer;" onclick="toggleVoice()">
+                🔊 Read Aloud
+            </button>
+        </div>
+    </div>
+
+    <!-- Header Banner -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(0, 229, 255, 0.08)); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 18px; padding: 1.35rem; margin-bottom: 1.25rem; position: relative; overflow: hidden;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap;">
+            <div>
+                <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.8rem;">🗺️</span>
+                    <h1 style="margin: 0; font-size: 1.8rem; color: var(--text-main); font-weight: 800;">
+                        {{ skill.name }}: Skill Roadmap
+                    </h1>
+                </div>
+                <p id="tts-summary" style="margin: 0 0 1rem 0; color: var(--text-muted); font-size: 1.05rem; line-height: 1.6; max-width: 650px;">
+                    {{ summary }}
+                </p>
+                <div style="display: flex; gap: 1rem; align-items: center; flex-wrap: wrap;">
+                    <span style="background: rgba(255, 255, 255, 0.05); padding: 0.3rem 0.8rem; border-radius: 8px; font-size: 0.85rem; color: var(--text-main);">
+                        Domain: <strong style="color: var(--accent-cyan);">{{ goal.domain }}</strong>
+                    </span>
+                    <span style="background: rgba(255, 255, 255, 0.05); padding: 0.3rem 0.8rem; border-radius: 8px; font-size: 0.85rem; color: var(--text-main);">
+                        Level: <strong style="color: var(--accent-indigo);">{{ goal.current_level|title }}</strong>
+                    </span>
+                    <span style="background: rgba(255, 255, 255, 0.05); padding: 0.3rem 0.8rem; border-radius: 8px; font-size: 0.85rem; color: var(--text-main);">
+                        Total Concepts: <strong style="color: #10b981;">{{ concepts|length }}</strong>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Mentor Message Callout -->
+            <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 12px; padding: 1.25rem; max-width: 280px;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                    <span style="font-size: 1.1rem;">🧭</span>
+                    <strong style="color: var(--accent-cyan); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px;">Mentor's Rule</strong>
+                </div>
+                <p id="tts-mentor" style="margin: 0; color: #cbd5e1; font-size: 0.88rem; line-height: 1.5;">
+                    {{ mentor_message|default:"We teach one concept at a time. After each concept, you'll tackle a 5-question check to guarantee mastery." }}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sequential Learning Path -->
+    <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.15rem; color: var(--text-main); margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.65rem;">
+            <span>📍</span> Topics in this level
+        </h2>
+
+        <div class="chapter-path">
+            {% for c in concepts %}
+            <div class="card chapter-card" style="background: var(--bg-card); border-radius: 14px; padding: 1.5rem 1.75rem; position: relative; transition: all 0.25s;
+                {% if forloop.counter0 < current_index %}
+                    border: 1px solid rgba(16, 185, 129, 0.4); background: rgba(16, 185, 129, 0.03);
+                {% elif forloop.counter0 == current_index %}
+                    border: 2px solid var(--accent-cyan); box-shadow: 0 0 25px rgba(0, 229, 255, 0.15); background: rgba(0, 229, 255, 0.04);
+                {% else %}
+                    border: 1px solid var(--border-subtle); opacity: 0.7;
+                {% endif %}">
+                
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 1.5rem;">
+                    <div style="display: flex; gap: 1.25rem; align-items: flex-start;">
+                        <!-- Step Badge -->
+                        <div style="width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.1rem; flex-shrink: 0;
+                            {% if forloop.counter0 < current_index %}
+                                background: #10b981; color: #000;
+                            {% elif forloop.counter0 == current_index %}
+                                background: var(--gradient-primary); color: #000; box-shadow: 0 0 15px rgba(0, 229, 255, 0.4);
+                            {% else %}
+                                background: rgba(255,255,255,0.05); color: var(--text-muted);
+                            {% endif %}">
+                            {% if forloop.counter0 < current_index %}
+                                ✓
+                            {% else %}
+                                {{ forloop.counter }}
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.35rem;">
+                                <h3 style="margin: 0; font-size: 1.2rem; color: var(--text-main); font-weight: 600;">
+                                    {{ c.name }}
+                                </h3>
+                                {% if forloop.counter0 < current_index %}
+                                    <span style="background: rgba(16, 185, 129, 0.15); color: #10b981; font-size: 0.75rem; padding: 0.15rem 0.6rem; border-radius: 10px; font-weight: 600;">MASTERED</span>
+                                {% elif forloop.counter0 == current_index %}
+                                    <span style="background: rgba(0, 229, 255, 0.15); color: var(--accent-cyan); font-size: 0.75rem; padding: 0.15rem 0.6rem; border-radius: 10px; font-weight: 600; animation: pulse 2s infinite;">CURRENT LESSON</span>
+                                {% else %}
+                                    <span style="background: rgba(255, 255, 255, 0.05); color: var(--text-muted); font-size: 0.75rem; padding: 0.15rem 0.6rem; border-radius: 10px;">LOCKED</span>
+                                {% endif %}
+                            </div>
+                            <p style="margin: 0 0 0.5rem 0; color: var(--text-muted); font-size: 0.95rem; line-height: 1.5;">
+                                {{ c.description }}
+                            </p>
+                            <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; color: #cbd5e1;">
+                                <span style="color: var(--accent-indigo);">★</span> <em>{{ c.importance }}</em>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Button per card -->
+                    <div style="flex-shrink: 0;">
+                        {% if forloop.counter0 == current_index %}
+                            <a href="{% url 'teach_concept' pk=skill.pk %}" class="btn-primary" style="background: var(--gradient-primary); border: none; color: #000; font-weight: 700; padding: 0.7rem 1.4rem; font-size: 0.95rem; border-radius: 8px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem; box-shadow: 0 0 15px rgba(0, 229, 255, 0.3);">
+                                Teach Me This &rarr;
+                            </a>
+                        {% elif forloop.counter0 < current_index %}
+                            <span style="color: #10b981; font-size: 0.9rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.3rem;">
+                                Completed 5/5
+                            </span>
+                        {% else %}
+                            <span style="color: var(--text-muted); font-size: 0.85rem;">
+                                Complete previous first
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Bottom Start Call To Action -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(99, 102, 241, 0.05)); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 16px; padding: 1.25rem; text-align: center;">
+        <h3 style="margin: 0 0 0.5rem 0; font-size: 1.3rem; color: var(--text-main);">
+            Ready to Begin Concept {{ current_index|add:1 }}?
+        </h3>
+        <p style="margin: 0 0 1.5rem 0; color: var(--text-muted); font-size: 0.95rem;">
+            Learn one topic at a time. Ask your teacher whenever you need help.
+        </p>
+        <a href="{% url 'teach_concept' pk=skill.pk %}" class="btn-primary" style="background: var(--gradient-primary); border: none; color: #000; font-weight: 700; padding: 1rem 3rem; font-size: 1.1rem; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.75rem; box-shadow: 0 4px 20px rgba(0, 229, 255, 0.3);">
+            🚀 Start Learning Concept {{ current_index|add:1 }}
+        </a>
+    </div>
+
+</div>
+
+<script>
+    let isSpeaking = false;
+    let synth = window.speechSynthesis;
+
+    function toggleVoice() {
+        if (isSpeaking) {
+            synth.cancel();
+            isSpeaking = false;
+            document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+            return;
+        }
+
+        const textToRead = [
+            document.getElementById('tts-summary')?.innerText,
+            document.getElementById('tts-mentor')?.innerText
+        ].filter(Boolean).join('. ');
+
+        if (!textToRead) return;
+
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.rate = 1.0;
+        utterance.onend = () => {
+            isSpeaking = false;
+            document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+        };
+        utterance.onerror = () => {
+            isSpeaking = false;
+            document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+        };
+
+        isSpeaking = true;
+        document.getElementById('voice-btn').innerText = "⏹️ Stop";
+        synth.speak(utterance);
+    }
+</script>
+{% endblock %}

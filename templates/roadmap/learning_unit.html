@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block title %}Learn {{ skill.name }} — EXA{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <a href="{% url 'dashboard' pk=goal.pk %}" style="color: var(--text-muted); text-decoration: none; font-weight: 500;">&larr; Back to Dashboard</a>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+            <button id="voice-btn" class="btn-primary" style="background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 0.5rem 1rem; font-size: 0.9rem;" onclick="toggleVoice()">
+                🔊 Read Aloud
+            </button>
+        </div>
+    </div>
+
+    <!-- AI Analyzing Animation -->
+    <div id="ai-loading" class="card" style="text-align: center; padding: 4rem; display: none;">
+        <div style="display: inline-block; position: relative; width: 80px; height: 80px;">
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 2px solid transparent; border-top-color: var(--accent-cyan); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+            <div style="position: absolute; top: 10px; left: 10px; width: 60px; height: 60px; border: 2px solid transparent; border-bottom-color: var(--accent-indigo); border-radius: 50%; animation: spin 2s linear infinite reverse;"></div>
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 1.5rem;">🧠</div>
+        </div>
+        <h3 id="ai-loading-text" style="color: var(--accent-cyan); margin-top: 2rem; letter-spacing: 2px;">EVALUATING...</h3>
+        <style>@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }</style>
+    </div>
+
+    <div id="learning-content">
+        <h1 style="color: var(--text-main); font-size: 2.5rem; margin-bottom: 0.5rem;">{{ skill.name }}</h1>
+        <p style="color: var(--text-muted); font-size: 1.1rem; margin-bottom: 2rem;">{{ skill.description }}</p>
+
+        <!-- Concept -->
+        <div class="card" style="border-left: 4px solid var(--accent-indigo);">
+            <h3 style="margin-top: 0; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 2px;">Concept</h3>
+            <p id="tts-concept" style="font-size: 1.2rem; line-height: 1.6; color: var(--text-main); margin-bottom: 0;">{{ unit.concept }}</p>
+        </div>
+
+        <!-- Why it matters -->
+        <div style="margin-bottom: 2rem; padding: 0 1rem;">
+            <h3 style="margin-top: 0; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 2px;">Why it matters</h3>
+            <p id="tts-why" style="font-size: 1rem; line-height: 1.6; color: var(--text-main);">{{ unit.why_it_matters }}</p>
+        </div>
+
+        <!-- Example -->
+        <div class="card" style="background: rgba(0,0,0,0.3); border: 1px solid var(--border-subtle);">
+            <h3 style="margin-top: 0; color: var(--text-muted); text-transform: uppercase; font-size: 0.85rem; letter-spacing: 2px;">Example</h3>
+            <pre style="background: #0f1115; padding: 1rem; border-radius: 8px; overflow-x: auto; color: #e2e8f0; font-family: monospace; font-size: 0.95rem; margin-bottom: 0;"><code id="tts-example">{{ unit.example }}</code></pre>
+        </div>
+
+        <!-- Quick Tip -->
+        {% if unit.quick_tip %}
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 2.5rem; display: flex; gap: 1rem; align-items: start;">
+            <span style="font-size: 1.5rem;">💡</span>
+            <div>
+                <strong style="color: #10b981; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 0.25rem;">Quick Tip</strong>
+                <span id="tts-tip" style="color: #e2e8f0;">{{ unit.quick_tip }}</span>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Mentor Assessment CTA -->
+        <div class="card" style="border: 1px solid var(--accent-cyan); background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), rgba(99, 102, 241, 0.08)); text-align: center; padding: 2rem;">
+            <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎯</div>
+            <h3 style="margin: 0 0 0.5rem 0; color: var(--text-main); font-size: 1.3rem;">Mastered this concept?</h3>
+            <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem; max-width: 500px; margin-left: auto; margin-right: auto;">
+                Verify your mastery with the <strong>5-Question Mentor Assessment</strong>. Score 5/5 to earn celebration applause and unlock the next skill!
+            </p>
+            <a href="{% url 'quiz' pk=skill.pk %}" class="btn-primary" style="background: var(--gradient-primary); border: none; color: #000; font-weight: 800; padding: 0.9rem 2.5rem; font-size: 1.05rem; border-radius: 10px; text-decoration: none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                Take the 5-Question Quiz &rarr;
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    let isSpeaking = false;
+    let synth = window.speechSynthesis;
+
+    function toggleVoice() {
+        if (isSpeaking) {
+            synth.cancel();
+            isSpeaking = false;
+            document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+            return;
+        }
+
+        const textToRead = [
+            document.getElementById('tts-concept')?.innerText,
+            document.getElementById('tts-why')?.innerText,
+            "Example:",
+            document.getElementById('tts-example')?.innerText,
+            document.getElementById('tts-tip')?.innerText,
+            "Practice:",
+            document.getElementById('tts-practice')?.innerText
+        ].filter(Boolean).join('. ');
+
+        if (textToRead) {
+            const utterThis = new SpeechSynthesisUtterance(textToRead);
+            utterThis.rate = 1.0;
+            utterThis.pitch = 1.0;
+            
+            // Try to find a good voice
+            const voices = synth.getVoices();
+            const preferredVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Samantha') || v.lang === 'en-US');
+            if (preferredVoice) utterThis.voice = preferredVoice;
+
+            utterThis.onend = function() {
+                isSpeaking = false;
+                document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+            };
+
+            synth.speak(utterThis);
+            isSpeaking = true;
+            document.getElementById('voice-btn').innerText = "⏹ Stop Reading";
+        }
+    }
+
+    // Ensure voices are loaded
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = () => synth.getVoices();
+    }
+
+    function submitPractice() {
+        const answer = document.getElementById('practice-answer').value;
+        if (!answer.trim()) return;
+
+        // Show AI Analyzing animation
+        document.getElementById('learning-content').style.display = 'none';
+        document.getElementById('ai-loading').style.display = 'block';
+
+        fetch("{% url 'practice_submit' pk=skill.pk %}", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({answer: answer})
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hide animation, show feedback
+            document.getElementById('ai-loading').style.display = 'none';
+            document.getElementById('learning-content').style.display = 'block';
+            
+            const feedbackSection = document.getElementById('feedback-section');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackText = document.getElementById('feedback-text');
+            const nextActionBtn = document.getElementById('next-action-btn');
+            
+            feedbackSection.style.display = 'block';
+            feedbackText.innerText = data.feedback;
+            
+            if (data.success) {
+                feedbackSection.style.borderLeft = "4px solid #10b981";
+                feedbackTitle.innerText = "Skill Verified 🎯";
+                feedbackTitle.style.color = "#10b981";
+                document.getElementById('submit-practice-btn').style.display = 'none';
+                document.getElementById('practice-answer').disabled = true;
+                
+                // Read feedback aloud automatically
+                synth.cancel();
+                synth.speak(new SpeechSynthesisUtterance("Skill verified. " + data.feedback));
+            } else {
+                feedbackSection.style.borderLeft = "4px solid #f59e0b";
+                feedbackTitle.innerText = "Weakness Detected ⚠️";
+                feedbackTitle.style.color = "#f59e0b";
+                
+                synth.cancel();
+                synth.speak(new SpeechSynthesisUtterance("Weakness detected. " + data.feedback));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            document.getElementById('ai-loading').style.display = 'none';
+            document.getElementById('learning-content').style.display = 'block';
+            alert("Connection error evaluating practice.");
+        });
+    }
+</script>
+{% endblock %}

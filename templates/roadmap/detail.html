@@ -1,0 +1,425 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ roadmap.domain }} Roadmap — ODIN FORCE{% endblock %}
+
+{% block content %}
+<section class="roadmap-detail-section asgard-detail">
+    <div class="container">
+        <!-- Top Action & Navigation Bar -->
+        <div class="roadmap-topbar">
+            <a href="{% url 'roadmap_history' %}" class="back-link">
+                <span>← Back to Roadmap Library</span>
+            </a>
+            <div class="topbar-actions">
+                <a href="{% url 'roadmap_daily_guidance' pk=roadmap.pk %}" class="btn btn-sm btn-accent"
+                    id="topbar-daily-guidance-btn">
+                    <span>⚡ Thor's Daily Guidance</span>
+                </a>
+                <a href="{% url 'roadmap_progress' pk=roadmap.pk %}" class="btn btn-sm btn-outline"
+                    id="topbar-progress-btn">
+                    <span>🛡️ Valhalla Progress</span>
+                </a>
+                <button class="btn btn-sm btn-ghost" onclick="window.print()" title="Print / Export Roadmap">
+                    <span>🖨️ Export PDF</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Hero Card / Roadmap Overview -->
+        <div class="roadmap-hero-card asgard-card">
+            <div class="hero-card-left">
+                <div class="domain-tag-badge">
+                    <span class="badge-rune">ᚱ</span>
+                    <span class="badge-dot"></span>
+                    <span>{{ roadmap.domain }}</span>
+                </div>
+                <h1 class="roadmap-title">{{ roadmap.goal }}</h1>
+
+                <div class="roadmap-meta-chips">
+                    <div class="meta-chip">
+                        <span class="chip-icon">🎯</span>
+                        <span class="chip-label">Level:</span>
+                        <strong>{{ roadmap.current_level }}</strong>
+                    </div>
+                    <div class="meta-chip">
+                        <span class="chip-icon">⏱️</span>
+                        <span class="chip-label">Pace:</span>
+                        <strong>{{ roadmap.available_time }}</strong>
+                    </div>
+                    <div class="meta-chip">
+                        <span class="chip-icon">📅</span>
+                        <span class="chip-label">Duration:</span>
+                        <strong>{{ roadmap.duration }}</strong>
+                    </div>
+                    {% if roadmap.existing_skills %}
+                    <div class="meta-chip">
+                        <span class="chip-icon">⚡</span>
+                        <span class="chip-label">Background:</span>
+                        <strong>{{ roadmap.existing_skills|truncatechars:35 }}</strong>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Progress Meter Widget -->
+            <div class="hero-card-right">
+                <div class="overall-progress-card">
+                    <div class="progress-circle-wrap">
+                        <div class="progress-ring-container">
+                            <span class="progress-number" id="hero-progress-num">{{ roadmap.progress_percentage }}%</span>
+                            <span class="progress-sub">Mastered</span>
+                        </div>
+                    </div>
+                    <div class="progress-stats-mini">
+                        <div><strong id="hero-completed-tasks">{{ roadmap.completed_tasks }}</strong> / {{ roadmap.total_tasks }} Tasks Done</div>
+                        <div class="stage-tracker-pill">
+                            Focus: <strong>{{ roadmap.current_stage.title|default:"Valhalla Achieved! 🎉" }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Roadmap Stages Container -->
+        <div class="stages-container">
+            <div class="stages-header">
+                <div>
+                    <h2 class="stages-main-title">Personalized Roadmap Stages</h2>
+                    <p class="stages-subtitle">Follow each stage sequentially. Check off topics as you conquer them!</p>
+                </div>
+                <div class="stages-summary-badge">
+                    <span>⚡ {{ stages|length }} Asgardian Stages</span>
+                </div>
+            </div>
+
+            <div class="stages-timeline">
+                {% for stage in stages %}
+                <div class="stage-card asgard-card {% if stage == current_stage %}active-current-stage{% elif stage.is_completed %}completed-stage{% endif %}"
+                    id="stage-{{ stage.pk }}">
+                    <!-- Stage Top Header -->
+                    <div class="stage-header">
+                        <div class="stage-index-badge">
+                            <span class="stage-num-text">Stage {{ stage.order }}</span>
+                            {% if stage.is_completed %}
+                            <span class="stage-status-tag completed">✓ Conquered</span>
+                            {% elif stage == current_stage %}
+                            <span class="stage-status-tag active">▶ In Progress</span>
+                            {% else %}
+                            <span class="stage-status-tag upcoming">Upcoming</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="stage-title-wrap">
+                            <h3 class="stage-title">{{ stage.title }}</h3>
+                            <span class="stage-duration-chip">⏱️ {{ stage.estimated_duration }}</span>
+                        </div>
+
+                        <div class="stage-progress-indicator">
+                            <div class="stage-progress-bar-bg">
+                                <div class="stage-progress-bar-fill" id="stage-bar-{{ stage.pk }}"
+                                    style="width: {{ stage.progress_percentage }}%;"></div>
+                            </div>
+                            <span class="stage-progress-label" id="stage-percent-{{ stage.pk }}">{{ stage.completed_tasks_count }} / {{ stage.total_tasks_count }} steps complete</span>
+                        </div>
+                    </div>
+
+                    <!-- Stage Description & Rationale -->
+                    <div class="stage-overview-box">
+                        <div class="overview-section">
+                            <span class="section-micro-tag">Stage Overview</span>
+                            <p class="stage-desc-text">{{ stage.description }}</p>
+                        </div>
+
+                        <div class="why-it-matters-box">
+                            <div class="why-header">
+                                <span class="why-icon">👁️</span>
+                                <strong>Why this matters (Odin's Rationale):</strong>
+                            </div>
+                            <p class="why-text">{{ stage.why_it_matters }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Stage Body Grid: What to Learn vs Practice & Projects -->
+                    <div class="stage-columns-grid">
+                        <!-- Left Column: What to Learn (Topics) -->
+                        <div class="stage-col topics-col">
+                            <div class="col-header">
+                                <h4>📚 What to Learn (Key Concepts)</h4>
+                                <span class="col-hint">Click checkboxes to track progress</span>
+                            </div>
+
+                            <div class="tasks-list">
+                                {% for task in stage.tasks.all %}
+                                <div class="task-item {% if task.completed %}task-completed{% endif %}"
+                                    id="task-card-{{ task.pk }}">
+                                    <form method="post" action="{% url 'toggle_task' pk=task.pk %}"
+                                        class="task-toggle-form" data-task-id="{{ task.pk }}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{{ request.path }}">
+                                        <label class="custom-checkbox-label">
+                                            <input type="checkbox" name="completed" class="task-checkbox" {% if task.completed %}checked{% endif %} onchange="toggleTaskAjax(this, {{ task.pk }})">
+                                            <span class="custom-checkmark"></span>
+                                            <div class="task-content">
+                                                <div class="task-title-line">
+                                                    <span class="task-type-badge type-{{ task.task_type }}">{{ task.get_task_type_display }}</span>
+                                                    <span class="task-title-text">{{ task.title }}</span>
+                                                </div>
+                                                {% if task.description %}
+                                                <p class="task-desc">{{ task.description }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </label>
+                                    </form>
+                                </div>
+                                {% empty %}
+                                <p class="empty-hint">No specific topics listed for this stage.</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Practice & Suggested Projects -->
+                        <div class="stage-col practice-col">
+                            <!-- What to Practice -->
+                            {% if stage.what_to_practice %}
+                            <div class="practice-box">
+                                <div class="col-header">
+                                    <h4>⚡ Thor's Practice Drills</h4>
+                                </div>
+                                <div class="practice-content">
+                                    <p>{{ stage.what_to_practice|linebreaksbr }}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Suggested Projects -->
+                            {% if stage.suggested_projects %}
+                            <div class="projects-box">
+                                <div class="col-header">
+                                    <h4>🏆 Suggested Portfolio Projects</h4>
+                                </div>
+                                <div class="projects-content">
+                                    <p>{{ stage.suggested_projects|linebreaksbr }}</p>
+                                </div>
+                            </div>
+                            {% endif %}
+
+                            <!-- Ask the Council Stage Helper Box -->
+                            <div class="stage-ask-box" id="ask-box-{{ stage.pk }}">
+                                <div class="ask-header">
+                                    <span class="ask-avatar">👑</span>
+                                    <span class="ask-title">Consult the Council about this stage:</span>
+                                </div>
+
+                                <div class="mentor-select-row">
+                                    <label class="mentor-radio">
+                                        <input type="radio" name="mentor_{{ stage.pk }}" value="ta_junior" checked>
+                                        <span>🌱 ODIN FORCE</span>
+                                    </label>
+                                    <label class="mentor-radio">
+                                        <input type="radio" name="mentor_{{ stage.pk }}" value="odin">
+                                        <span>👁️ Odin</span>
+                                    </label>
+                                    <label class="mentor-radio">
+                                        <input type="radio" name="mentor_{{ stage.pk }}" value="thor">
+                                        <span>⚡ Thor</span>
+                                    </label>
+                                    <label class="mentor-radio">
+                                        <input type="radio" name="mentor_{{ stage.pk }}" value="loki">
+                                        <span>🐍 Loki</span>
+                                    </label>
+                                </div>
+
+                                <div class="ask-form-wrap">
+                                    <input type="text" class="ask-input" id="ask-input-{{ stage.pk }}"
+                                        placeholder="e.g. How can I practice this if I'm stuck?">
+                                    <button type="button" class="btn btn-sm btn-primary ask-btn"
+                                        onclick="askCouncilDeity({{ roadmap.pk }}, {{ stage.pk }}, '{{ stage.title|escapejs }}')">
+                                        Consult Mentor
+                                    </button>
+                                </div>
+                                <div class="ask-response-area" id="ask-response-{{ stage.pk }}" style="display: none;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Specialist tools open on their own focused pages. -->
+                    <div class="stage-specialist-actions" aria-label="Learning support for {{ stage.title }}">
+                        <a href="{% url 'heimdall_page' stage_id=stage.pk %}" class="specialist-action-button heimdall-action-button">
+                            <span class="specialist-button-logo" aria-hidden="true">◈</span>
+                            <span>Exact skills</span>
+                            <b aria-hidden="true">→</b>
+                        </a>
+                        <a href="{% url 'hulk_page' stage_id=stage.pk %}" class="specialist-action-button hulk-action-button">
+                            <span class="specialist-button-logo" aria-hidden="true">✦</span>
+                            <span>Practice &amp; resources</span>
+                            <b aria-hidden="true">→</b>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Motivational Quote Section -->
+        <div class="motivational-quote-section">
+            <div class="quote-container">
+                <blockquote class="quote-text">
+                    <span class="quote-mark">"</span>
+                    <p>Let's grow together.</p>
+                    <span class="quote-mark quote-end">"</span>
+                </blockquote>
+                <p class="quote-attribution">— Your ODIN FORCE Mentor</p>
+            </div>
+        </div>
+
+        <section class="specialist-support" aria-labelledby="specialist-support-title">
+            <div class="specialist-support-copy">
+                <span class="section-tag">Built-in support</span>
+                <h2 id="specialist-support-title">Choose your guide</h2>
+                <p>Heimdall maps the skills. Hulk turns them into practice.</p>
+            </div>
+            <div class="specialist-support-cards">
+                {% if current_stage %}
+                <a class="specialist-support-card heimdall-support" href="{% url 'stage_heimdall' stage_id=current_stage.pk %}">
+                    <img src="{% static 'images/heimdall.jpg' %}" alt="Heimdall">
+                    <span class="specialist-support-text"><strong>Heimdall</strong><small>Open exact skills</small></span>
+                    <span aria-hidden="true">→</span>
+                </a>
+                <a class="specialist-support-card hulk-support" href="{% url 'stage_hulk' stage_id=current_stage.pk %}">
+                    <img src="{% static 'images/hulk.jpg' %}" alt="Hulk">
+                    <span class="specialist-support-text"><strong>Hulk</strong><small>Open practice plan</small></span>
+                    <span aria-hidden="true">→</span>
+                </a>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Bottom Action CTA -->
+        <div class="roadmap-bottom-cta">
+            <div class="bottom-cta-card asgard-card">
+                <div class="cta-avatar">
+                    <img src="{% static 'images/ta_junior.svg' %}" alt="ODIN FORCE" class="cta-avatar-img">
+                </div>
+                <div class="cta-text-wrap">
+                    <h3>Ready for today's battle session?</h3>
+                    <p>Enter Thor's Daily Action Plan to get your single focused goal and Pomodoro focus drill.</p>
+                </div>
+                <div class="cta-btn-wrap">
+                    <a href="{% url 'roadmap_daily_guidance' pk=roadmap.pk %}"
+                        class="btn btn-lg btn-primary asgard-glow-btn">
+                        <span>Enter Today's Guidance</span>
+                        <span class="btn-arrow">→</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // AJAX Task Toggle Handler
+    function toggleTaskAjax(checkbox, taskId) {
+        const isChecked = checkbox.checked;
+        const taskCard = document.getElementById(`task-card-${taskId}`);
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        fetch(`/task/${taskId}/toggle/?format=json`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    // Update task visual state
+                    if (data.completed) {
+                        taskCard.classList.add('task-completed');
+                        showThunderShock(checkbox);
+                    } else {
+                        taskCard.classList.remove('task-completed');
+                    }
+
+                    // Update Stage progress bar & label
+                    const stageBar = document.getElementById(`stage-bar-${data.stage_id}`);
+                    const stageLabel = document.getElementById(`stage-percent-${data.stage_id}`);
+                    if (stageBar) stageBar.style.width = `${data.stage_progress}%`;
+                    if (stageLabel) stageLabel.textContent = `${data.stage_completed_count} / ${data.stage_total_count} steps complete`;
+
+                    // Update overall counts and percentage with the server-calculated values.
+                    const heroProgress = document.getElementById('hero-progress-num');
+                    const heroCompleted = document.getElementById('hero-completed-tasks');
+                    const stepperCompleted = document.getElementById('stepper-completed-count');
+                    if (heroProgress) heroProgress.textContent = `${data.roadmap_progress}%`;
+                    if (heroCompleted) heroCompleted.textContent = data.completed_tasks;
+                    if (stepperCompleted) stepperCompleted.textContent = data.completed_tasks;
+                }
+            })
+            .catch(err => {
+                console.error('Error toggling task:', err);
+                checkbox.form.submit();
+            });
+    }
+
+    // Ask Council Deity Interactive Handler
+    function askCouncilDeity(roadmapId, stageId, stageTitle) {
+        const input = document.getElementById(`ask-input-${stageId}`);
+        const responseArea = document.getElementById(`ask-response-${stageId}`);
+        const question = input.value.trim();
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+        // Get chosen mentor radio
+        const mentorRadio = document.querySelector(`input[name="mentor_${stageId}"]:checked`);
+        const mentor = mentorRadio ? mentorRadio.value : 'ta_junior';
+
+        if (!question) {
+            input.focus();
+            return;
+        }
+
+        responseArea.style.display = 'block';
+        responseArea.innerHTML = '<div class="typing-indicator"><span>⚡ Channeling divine Asgardian counsel...</span></div>';
+
+        const formData = new FormData();
+        formData.append('question', question);
+        formData.append('stage_title', stageTitle);
+        formData.append('mentor', mentor);
+
+        fetch(`/roadmap/${roadmapId}/ask/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: formData
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    responseArea.innerHTML = `
+                <div class="ta-reply-bubble">
+                    <div class="reply-content">${data.answer.replace(/\\n/g, '<br>')}</div>
+                </div>
+            `;
+                    input.value = '';
+                } else {
+                    responseArea.innerHTML = `<div class="error-msg">${data.error || 'Could not get response.'}</div>`;
+                }
+            })
+            .catch(err => {
+                responseArea.innerHTML = `<div class="error-msg">Something went wrong. Please try again.</div>`;
+            });
+    }
+
+    function showThunderShock(element) {
+        element.classList.add('pop-anim');
+        setTimeout(() => element.classList.remove('pop-anim'), 500);
+    }
+</script>
+{% endblock %}

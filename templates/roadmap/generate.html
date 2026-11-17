@@ -1,0 +1,314 @@
+{% extends 'base.html' %}
+{% block title %}Start New Learning Track — EXA AI HUB | TASBI AI SOLUTIONS{% endblock %}
+
+{% block extra_head %}
+<style>
+    .onboard-container {
+        max-width: 900px;
+        margin: 1.5rem auto 4rem;
+    }
+
+    .onboard-card {
+        background: var(--gradient-dark);
+        border: 1px solid var(--border-subtle);
+        border-radius: 24px;
+        padding: clamp(1.75rem, 4vw, 3rem);
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .domain-select-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .domain-select-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    @media (max-width: 480px) {
+        .domain-select-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .domain-choice-card {
+        background: rgba(8, 12, 22, 0.75);
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        padding: 1.25rem 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .domain-choice-card:hover {
+        border-color: rgba(0, 229, 255, 0.4);
+        background: rgba(0, 229, 255, 0.04);
+        transform: translateY(-2px);
+    }
+
+    .domain-choice-card.selected {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 229, 255, 0.08);
+        box-shadow: 0 0 20px rgba(0, 229, 255, 0.2);
+    }
+
+    .domain-choice-icon {
+        font-size: 1.8rem;
+    }
+
+    .domain-choice-name {
+        font-weight: 750;
+        font-size: 0.95rem;
+        color: #fff;
+    }
+
+    .stage-choice-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 650px) {
+        .stage-choice-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .stage-choice-card {
+        background: rgba(8, 12, 22, 0.75);
+        border: 1px solid var(--border-subtle);
+        border-radius: 14px;
+        padding: 1.25rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .stage-choice-card:hover {
+        border-color: var(--accent-indigo);
+    }
+
+    .stage-choice-card.selected {
+        border-color: var(--accent-cyan);
+        background: rgba(0, 229, 255, 0.06);
+    }
+
+    .goal-suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.6rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .suggestion-chip {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #cbd5e1;
+        font-size: 0.78rem;
+        padding: 0.3rem 0.75rem;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .suggestion-chip:hover {
+        border-color: var(--accent-cyan);
+        color: var(--accent-cyan);
+        background: rgba(0, 229, 255, 0.08);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="onboard-container">
+    <div class="onboard-card">
+        <!-- Header -->
+        <div style="text-align:center; margin-bottom:2.5rem;">
+            <div style="width:60px; height:60px; background:rgba(0,229,255,0.1); border:1px solid var(--accent-cyan); border-radius:50%; margin:0 auto 1.25rem auto; display:grid; place-items:center; font-size:1.8rem; box-shadow:0 0 25px rgba(0,229,255,0.25);">
+                ⚡
+            </div>
+            <h1 style="font-size:clamp(1.9rem, 3.5vw, 2.6rem); margin:0 0 0.5rem 0; font-weight:850; letter-spacing:-0.5px;">
+                Shape Your Engineering Track
+            </h1>
+            <p style="color:var(--text-muted); font-size:1.05rem; max-width:620px; margin:0 auto; line-height:1.6;">
+                Select your engineering domain and learning stage. EXA AI HUB will design a structured, visual learning journey with 3 verified stage projects.
+            </p>
+        </div>
+
+        <!-- 1. Domain Selector Buttons -->
+        <div style="margin-bottom:1rem;">
+            <label style="display:block; font-size:0.9rem; font-weight:750; color:var(--text-main); margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:1px;">
+                1. Select Learning Domain
+            </label>
+            <div class="domain-select-grid">
+                <div class="domain-choice-card" onclick="selectDomain('Full Stack Development', 'web_dev', this)">
+                    <span class="domain-choice-icon">💻</span>
+                    <span class="domain-choice-name">Full Stack Dev</span>
+                    <span style="font-size:0.72rem; color:var(--text-muted);">Django &bull; React &bull; APIs</span>
+                </div>
+                <div class="domain-choice-card" onclick="selectDomain('AI & Machine Learning', 'ai_ml', this)">
+                    <span class="domain-choice-icon">🤖</span>
+                    <span class="domain-choice-name">AI &amp; ML</span>
+                    <span style="font-size:0.72rem; color:var(--text-muted);">Scikit &bull; NLP &bull; RAG</span>
+                </div>
+                <div class="domain-choice-card" onclick="selectDomain('Robotics & Embedded Systems', 'robotics', this)">
+                    <span class="domain-choice-icon">🦾</span>
+                    <span class="domain-choice-name">Robotics</span>
+                    <span style="font-size:0.72rem; color:var(--text-muted);">PID &bull; IMU &bull; ROS 2</span>
+                </div>
+                <div class="domain-choice-card" onclick="selectDomain('Data Analysis', 'data_analytics', this)">
+                    <span class="domain-choice-icon">📊</span>
+                    <span class="domain-choice-name">Data Analysis</span>
+                    <span style="font-size:0.72rem; color:var(--text-muted);">Excel &bull; SQL &bull; BI</span>
+                </div>
+                <div class="domain-choice-card" onclick="selectDomain('Electrical & Electronics Engineering', 'electronics', this)">
+                    <span class="domain-choice-icon">⚡</span>
+                    <span class="domain-choice-name">Electronics (EEE)</span>
+                    <span style="font-size:0.72rem; color:var(--text-muted);">Circuits &bull; OpAmps &bull; PCB</span>
+                </div>
+                <div class="domain-choice-card" onclick="selectDomain('Cybersecurity', 'cybersecurity', this)">
+                    <span class="domain-choice-icon">🛡️</span>
+                    <span class="domain-choice-name">Cybersecurity</span>
+                    <span style="font-size:0.72rem; color:var(--text-muted);">Hardening &bull; SOC &bull; IR</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Submission -->
+        <form method="POST" action="{% url 'odin_onboarding' %}" id="onboarding-form">
+            {% csrf_token %}
+
+            <input type="hidden" name="domain" id="id_domain_hidden" value="{{ form.domain.value|default:'' }}">
+
+            <!-- 2. Learning Stage Selector -->
+            <div style="margin-bottom:1.75rem;">
+                <label style="display:block; font-size:0.9rem; font-weight:750; color:var(--text-main); margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:1px;">
+                    2. Choose Your Learning Stage
+                </label>
+                <div class="stage-choice-grid">
+                    <div class="stage-choice-card" onclick="selectTier('Beginner', this)">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                            <strong style="color:#10B981; font-size:1.05rem;">Beginner</strong>
+                            <span class="stage-pill-sm stage-pill-beginner">Start from 0</span>
+                        </div>
+                        <p style="margin:0; font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
+                            Fundamentals, core syntax, visual mental models &amp; Stage 1 Mini Project.
+                        </p>
+                    </div>
+                    <div class="stage-choice-card" onclick="selectTier('Intermediate', this)">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                            <strong style="color:#818CF8; font-size:1.05rem;">Intermediate</strong>
+                            <span class="stage-pill-sm stage-pill-intermediate">Practical</span>
+                        </div>
+                        <p style="margin:0; font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
+                            Multi-concept systems, validation, error-handling &amp; Stage 2 Practical App.
+                        </p>
+                    </div>
+                    <div class="stage-choice-card" onclick="selectTier('Advanced', this)">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                            <strong style="color:#FBBF24; font-size:1.05rem;">Advanced</strong>
+                            <span class="stage-pill-sm stage-pill-advanced">Industry</span>
+                        </div>
+                        <p style="margin:0; font-size:0.82rem; color:var(--text-muted); line-height:1.5;">
+                            Architecture, testing, security, containerization &amp; Stage 3 Capstone.
+                        </p>
+                    </div>
+                </div>
+                <div style="display:none;">
+                    {{ form.chosen_tier }}
+                </div>
+            </div>
+
+            <!-- 3. Goal Text Input -->
+            <div style="margin-bottom:1.5rem;">
+                <label for="id_goal" style="display:block; font-size:0.9rem; font-weight:750; color:var(--text-main); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:1px;">
+                    3. What role or capability do you want to master?
+                </label>
+                {{ form.goal }}
+                <div class="goal-suggestions">
+                    <span class="suggestion-chip" onclick="setGoal('Full Stack Web Developer')">+ Full Stack Web Developer</span>
+                    <span class="suggestion-chip" onclick="setGoal('AI & RAG Applications Engineer')">+ AI &amp; RAG Engineer</span>
+                    <span class="suggestion-chip" onclick="setGoal('Autonomous Robotics Engineer')">+ Autonomous Robotics</span>
+                    <span class="suggestion-chip" onclick="setGoal('Senior Data Analyst & BI Specialist')">+ Senior Data Analyst</span>
+                    <span class="suggestion-chip" onclick="setGoal('Mixed-Signal Electronics Designer')">+ Electronics (EEE) Designer</span>
+                    <span class="suggestion-chip" onclick="setGoal('Cybersecurity Operations Analyst')">+ Cybersecurity Analyst</span>
+                </div>
+            </div>
+
+            <!-- 4. Existing Skills -->
+            <div style="margin-bottom:1.5rem;">
+                <label for="id_existing_skills" style="display:block; font-size:0.9rem; font-weight:750; color:var(--text-main); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:1px;">
+                    4. What skills or experience do you already have? (Optional)
+                </label>
+                {{ form.existing_skills }}
+            </div>
+
+            <!-- 5. User Name -->
+            <div style="margin-bottom:2.25rem;">
+                <label for="id_user_name" style="display:block; font-size:0.9rem; font-weight:750; color:var(--text-main); margin-bottom:0.4rem; text-transform:uppercase; letter-spacing:1px;">
+                    5. Your Name / Preferred Handle
+                </label>
+                {{ form.user_name }}
+            </div>
+
+            <button type="submit" class="btn-primary" style="width:100%; padding:1.15rem; font-size:1.1rem; letter-spacing:1px; text-transform:uppercase;">
+                🚀 Build My Interactive Learning Path
+            </button>
+        </form>
+    </div>
+</main>
+
+<script>
+    function selectDomain(name, key, el) {
+        document.querySelectorAll('.domain-choice-card').forEach(c => c.classList.remove('selected'));
+        if (el) el.classList.add('selected');
+        const input = document.getElementById('id_domain_hidden');
+        if (input) input.value = name;
+    }
+
+    function selectTier(tier, el) {
+        document.querySelectorAll('.stage-choice-card').forEach(c => c.classList.remove('selected'));
+        if (el) el.classList.add('selected');
+        const select = document.getElementById('id_chosen_tier');
+        if (select) select.value = tier;
+    }
+
+    function setGoal(text) {
+        const goalInput = document.getElementById('id_goal');
+        if (goalInput) goalInput.value = text;
+    }
+
+    // Auto-select on load if preset
+    window.addEventListener('DOMContentLoaded', () => {
+        const domainVal = "{{ form.domain.value|default:'' }}";
+        const tierVal = "{{ form.chosen_tier.value|default:'Beginner' }}";
+
+        if (domainVal) {
+            document.querySelectorAll('.domain-choice-card').forEach(c => {
+                if (c.textContent.toLowerCase().includes(domainVal.toLowerCase())) {
+                    c.classList.add('selected');
+                }
+            });
+            const input = document.getElementById('id_domain_hidden');
+            if (input) input.value = domainVal;
+        }
+
+        document.querySelectorAll('.stage-choice-card').forEach(c => {
+            if (c.textContent.includes(tierVal)) {
+                c.classList.add('selected');
+            }
+        });
+        const select = document.getElementById('id_chosen_tier');
+        if (select) select.value = tierVal;
+    });
+</script>
+{% endblock %}

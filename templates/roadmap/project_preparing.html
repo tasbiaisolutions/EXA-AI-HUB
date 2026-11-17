@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}Project preparation — EXA{% endblock %}
+{% block content %}
+<main style="max-width: 720px; margin: 5rem auto; padding: 2rem; text-align: center;">
+    <h1>This project is being prepared. Check back soon.</h1>
+    <p>{{ level_name }} cannot accept submissions until its Build Lab brief is ready.</p>
+    <a class="btn-primary" href="{% url 'dashboard' pk=goal.pk %}">Back to Dashboard</a>
+</main>
+{% endblock %}

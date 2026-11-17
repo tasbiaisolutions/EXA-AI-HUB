@@ -1,0 +1,638 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}EXA AI HUB — TASBI AI SOLUTIONS{% endblock %}</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_head %}{% endblock %}
+    <style>
+        :root {
+            --bg-base: #050508;
+            --bg-surface: #0a0e1a;
+            --bg-card: #0d1222;
+            --bg-card-hover: #12182c;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(0, 229, 255, 0.35);
+            --border-indigo: rgba(99, 102, 241, 0.35);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --text-subtle: #64748b;
+            --accent-cyan: #00E5FF;
+            --accent-cyan-glow: rgba(0, 229, 255, 0.25);
+            --accent-indigo: #6366F1;
+            --accent-emerald: #10B981;
+            --accent-amber: #F59E0B;
+            --accent-rose: #EF4444;
+            --gradient-primary: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
+            --gradient-emerald: linear-gradient(135deg, #059669, #10B981);
+            --gradient-amber: linear-gradient(135deg, #D97706, #F59E0B);
+            --gradient-dark: linear-gradient(145deg, rgba(13,18,34,0.96), rgba(8,11,20,0.96));
+            --radius-sm: 8px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
+            --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+            --shadow-glow: 0 0 30px -5px rgba(0, 229, 255, 0.25);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image:
+                radial-gradient(circle at 15% 0%, rgba(99, 102, 241, 0.12), transparent 35%),
+                radial-gradient(circle at 85% 10%, rgba(0, 229, 255, 0.08), transparent 40%),
+                radial-gradient(circle at 50% 100%, rgba(16, 185, 129, 0.05), transparent 35%);
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Typography & Hierarchy */
+        h1, h2, h3, h4, h5, h6, .brand-name, .font-heading {
+            font-family: 'Outfit', sans-serif;
+            letter-spacing: -0.02em;
+            line-height: 1.25;
+            color: var(--text-main);
+        }
+
+        p, li, label, span {
+            line-height: 1.65;
+        }
+
+        code, pre, .font-mono {
+            font-family: 'JetBrains Mono', 'Consolas', monospace;
+        }
+
+        /* Focus States & Accessibility */
+        :focus-visible {
+            outline: 2px solid var(--accent-cyan);
+            outline-offset: 3px;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(5, 5, 8, 0.8);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-cyan);
+        }
+
+        /* Site Header & Navigation */
+        .site-header {
+            background: rgba(8, 11, 20, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .header-inner {
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .brand-container {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+            text-decoration: none;
+            transition: transform 0.2s ease;
+        }
+
+        .brand-container:hover {
+            transform: scale(1.02);
+        }
+
+        .brand-logo-badge {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--gradient-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            font-weight: 900;
+            color: #040812;
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.35);
+        }
+
+        .brand-text-col {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .brand-name {
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+            line-height: 1.1;
+        }
+
+        .brand-sub {
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            font-weight: 700;
+            margin-top: 2px;
+        }
+
+        .main-nav {
+            display: flex;
+            gap: 1.75rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            position: relative;
+            padding: 0.35rem 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #ffffff;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background: var(--gradient-primary);
+            transition: width 0.25s ease;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .nav-badge {
+            background: rgba(0, 229, 255, 0.12);
+            color: var(--accent-cyan);
+            border: 1px solid rgba(0, 229, 255, 0.3);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 0.15rem 0.55rem;
+            border-radius: 999px;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-nav-action {
+            background: var(--gradient-primary);
+            color: #040812 !important;
+            padding: 0.6rem 1.35rem;
+            border-radius: 10px;
+            font-weight: 750;
+            font-size: 0.9rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-nav-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 229, 255, 0.45);
+        }
+
+        /* Mobile Hamburger */
+        .mobile-toggle {
+            display: none;
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            color: var(--text-main);
+            padding: 0.5rem 0.75rem;
+            border-radius: 8px;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        @media (max-width: 860px) {
+            .mobile-toggle {
+                display: block;
+            }
+            .main-nav {
+                display: none;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #090e1c;
+                border-bottom: 1px solid var(--border-subtle);
+                flex-direction: column;
+                padding: 1.5rem;
+                gap: 1.25rem;
+                align-items: flex-start;
+                box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            }
+            .main-nav.show {
+                display: flex;
+            }
+        }
+
+        /* Site Main Layout */
+        .site-main {
+            flex: 1;
+            max-width: 1400px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2.5rem 1.5rem 4rem;
+            box-sizing: border-box;
+        }
+
+        /* Cards Design System */
+        .card {
+            background: var(--gradient-dark);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            margin-bottom: 1.75rem;
+            box-shadow: var(--shadow-card);
+            transition: border-color 0.25s, box-shadow 0.25s;
+            position: relative;
+        }
+
+        .card:hover {
+            border-color: rgba(0, 229, 255, 0.25);
+        }
+
+        /* Standard Buttons */
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: #040812;
+            padding: 0.85rem 2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 750;
+            font-family: 'Outfit', sans-serif;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            box-shadow: 0 6px 20px rgba(0, 229, 255, 0.25);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(0, 229, 255, 0.4);
+            color: #000;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-main);
+            padding: 0.85rem 1.85rem;
+            border-radius: 10px;
+            font-weight: 650;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.95rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-cyan);
+            color: #fff;
+        }
+
+        /* Badges & Pills */
+        .stage-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.8rem;
+            border-radius: 999px;
+            font-size: 0.76rem;
+            font-weight: 750;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+        .stage-pill-beginner {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10B981;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        .stage-pill-intermediate {
+            background: rgba(99, 102, 241, 0.15);
+            color: #818CF8;
+            border: 1px solid rgba(99, 102, 241, 0.35);
+        }
+        .stage-pill-advanced {
+            background: rgba(245, 158, 11, 0.15);
+            color: #FBBF24;
+            border: 1px solid rgba(245, 158, 11, 0.35);
+        }
+
+        /* Form Inputs */
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.95rem 1.15rem;
+            margin-bottom: 1.25rem;
+            background: rgba(8, 13, 24, 0.8);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            border-radius: 10px;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.15);
+        }
+
+        /* Flash Messages */
+        .alert-box {
+            padding: 1rem 1.35rem;
+            border-radius: 12px;
+            margin-bottom: 1.25rem;
+            font-weight: 550;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            animation: fadeIn 0.3s ease;
+        }
+        .alert-success {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid #10B981;
+            color: #6EE7B7;
+        }
+        .alert-info {
+            background: rgba(0, 229, 255, 0.1);
+            border: 1px solid var(--accent-cyan);
+            color: #67E8F9;
+        }
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.12);
+            border: 1px solid #F59E0B;
+            color: #FDE68A;
+        }
+        .alert-error {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid #EF4444;
+            color: #FCA5A5;
+        }
+
+        /* Footer */
+        .site-footer {
+            border-top: 1px solid var(--border-subtle);
+            background: #060913;
+            color: var(--text-muted);
+            padding: 4rem 2rem 2.5rem;
+            margin-top: auto;
+        }
+
+        .footer-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 960px) {
+            .footer-inner {
+                grid-template-columns: 1fr 1fr;
+                gap: 2rem;
+            }
+        }
+        @media (max-width: 600px) {
+            .footer-inner {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .footer-heading {
+            color: var(--text-main);
+            font-size: 0.92rem;
+            font-weight: 750;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin: 0 0 1.2rem;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .footer-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-cyan);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.85rem;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="{% url 'home' %}" class="brand-container" aria-label="EXA AI HUB Home">
+                <div class="brand-logo-badge">⚡</div>
+                <div class="brand-text-col">
+                    <span class="brand-name">EXA AI HUB</span>
+                    <span class="brand-sub">TASBI AI SOLUTIONS • AGENT MENTORSHIP</span>
+                </div>
+            </a>
+
+            <button class="mobile-toggle" onclick="toggleNav()" aria-label="Toggle Navigation">☰</button>
+
+            <nav class="main-nav" id="main-nav">
+                <a href="{% url 'home' %}" class="nav-link">Home</a>
+                {% if request.session.current_goal_id %}
+                    <a href="{% url 'dashboard' pk=request.session.current_goal_id %}" class="nav-link">
+                        Dashboard <span class="nav-badge">Active</span>
+                    </a>
+                    <a href="{% url 'project' pk=request.session.current_goal_id %}" class="nav-link">
+                        Projects <span class="nav-badge">3 Stages</span>
+                    </a>
+                {% endif %}
+                <a href="{% url 'library' %}" class="nav-link">My Library</a>
+                <a href="{% url 'odin_onboarding' %}" class="btn-nav-action">+ Start New Track</a>
+            </nav>
+        </div>
+    </header>
+
+    {% if messages %}
+    <div style="max-width: 1400px; margin: 1.5rem auto 0; padding: 0 1.5rem; width: 100%; box-sizing: border-box;">
+        {% for message in messages %}
+        <div class="alert-box {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}">
+            <span>{{ message }}</span>
+            <button onclick="this.parentElement.style.display='none'" style="background:transparent; border:none; color:inherit; font-size:1.2rem; cursor:pointer;">&times;</button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <main class="site-main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div>
+                <div style="display:flex; align-items:center; gap:0.65rem; margin-bottom:1rem;">
+                    <span style="font-size:1.5rem;">⚡</span>
+                    <h3 style="margin:0; font-size:1.35rem; font-weight:800; color:#fff;">EXA AI HUB</h3>
+                </div>
+                <p style="font-size:0.92rem; line-height:1.7; margin-bottom:1.25rem; max-width:440px;">
+                    Engineered by <strong>TASBI AI SOLUTIONS</strong>. An AI-powered, visual-first mentorship platform designed to bring students and professionals to verified mastery through 3-stage practical projects and intelligent interactive guidance.
+                </p>
+                <div style="display:inline-flex; align-items:center; gap:0.5rem; background:rgba(0,229,255,0.08); border:1px solid rgba(0,229,255,0.25); padding:0.35rem 0.85rem; border-radius:8px; font-size:0.78rem; color:var(--accent-cyan); font-weight:600;">
+                    <span>🛡️ Verified Certification Engine Active</span>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Learning Domains</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'odin_onboarding' %}?domain=Full+Stack+Development&tier=Beginner">Full Stack Development</a></li>
+                    <li><a href="{% url 'odin_onboarding' %}?domain=AI+%26+Machine+Learning&tier=Beginner">AI &amp; Machine Learning</a></li>
+                    <li><a href="{% url 'odin_onboarding' %}?domain=Robotics&tier=Beginner">Robotics &amp; Embedded</a></li>
+                    <li><a href="{% url 'odin_onboarding' %}?domain=Data+Analysis&tier=Beginner">Data Analysis</a></li>
+                    <li><a href="{% url 'odin_onboarding' %}?domain=Electrical+%26+Electronics+Engineering&tier=Beginner">Electrical &amp; Electronics</a></li>
+                    <li><a href="{% url 'odin_onboarding' %}?domain=Cybersecurity&tier=Beginner">Cybersecurity</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Three-Stage Projects</h4>
+                <ul class="footer-links">
+                    <li><span class="stage-pill stage-pill-beginner" style="margin-bottom:0.4rem;">Stage 1: Beginner Mini</span></li>
+                    <li><span class="stage-pill stage-pill-intermediate" style="margin-bottom:0.4rem;">Stage 2: Practical App</span></li>
+                    <li><span class="stage-pill stage-pill-advanced">Stage 3: Industry Capstone</span></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="footer-heading">Platform &amp; Tools</h4>
+                <ul class="footer-links">
+                    <li><a href="{% url 'library' %}">Learner Hub &amp; Library</a></li>
+                    <li><a href="{% url 'odin_onboarding' %}">Curriculum Generator</a></li>
+                    {% if request.session.current_goal_id %}
+                    <li><a href="{% url 'dashboard' pk=request.session.current_goal_id %}">Current Roadmap</a></li>
+                    <li><a href="{% url 'project' pk=request.session.current_goal_id %}">Project Workspace</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div>&copy; 2026 TASBI AI SOLUTIONS. EXA AI HUB — All rights reserved.</div>
+            <div style="color:var(--text-subtle);">Crafted with Python, Django 6.1, MySQL, HTML5 &amp; Modern Vanilla CSS.</div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleNav() {
+            const nav = document.getElementById('main-nav');
+            if (nav) nav.classList.toggle('show');
+        }
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% block title %}Skill Assessment — {{ skill.name }} — EXA{% endblock %}
+
+{% block content %}
+<style>
+    .focus-levels { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:14px; }
+    .focus-level { padding:12px; background:rgba(255,255,255,.025); border:1px solid rgba(255,255,255,.08); border-radius:12px; }
+    .focus-level h2 { margin:0 0 8px; color:#e2e8f0; font-size:.95rem; line-height:1.35; }
+    .focus-topics { display:grid; gap:5px; margin:0; padding-left:18px; color:#cbd5e1; font-size:.84rem; line-height:1.45; }
+    @media(max-width:620px) { .focus-levels { grid-template-columns:1fr; } }
+</style>
+<div style="max-width: 820px; margin: 0 auto; padding: 1rem 0 2rem;">
+
+    <!-- Top Navigation & Status -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <a href="{% url 'dashboard' pk=goal.pk %}"
+            style="color: var(--text-muted); text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 0.5rem; transition: color 0.2s;"
+            onmouseover="this.style.color='var(--accent-cyan)'" onmouseout="this.style.color='var(--text-muted)'">
+            &larr; Back to Dashboard
+        </a>
+        <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <span
+                style="background: rgba(99, 102, 241, 0.15); border: 1px solid rgba(99, 102, 241, 0.3); color: var(--accent-indigo); padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                Quick Check-in
+            </span>
+            <button id="voice-btn" class="btn-primary"
+                style="background: transparent; border: 1px solid var(--accent-cyan); color: var(--accent-cyan); padding: 0.4rem 0.9rem; font-size: 0.85rem; border-radius: 8px; cursor: pointer;"
+                onclick="toggleVoice()">
+                🔊 Read Aloud
+            </button>
+        </div>
+    </div>
+
+    <!-- Mentor Intro & Skills Explanation Card -->
+    <div class="card"
+        style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(0, 229, 255, 0.06)); border: 1px solid rgba(0, 229, 255, 0.25); border-radius: 16px; padding: 1.25rem 1.35rem; margin-bottom: 1.25rem; position: relative;">
+        <div style="display: flex; gap: 1.25rem; align-items: center;">
+            <div
+                style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan)); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; box-shadow: 0 0 18px rgba(0, 229, 255, 0.3);">
+                🧭
+            </div>
+            <div>
+                <h1 style="margin: 0 0 0.35rem 0; font-size: 1.4rem; color: var(--text-main); font-weight: 700;">
+                    Before we start: {{ skill.name }}
+                </h1>
+                <p id="tts-intro" style="margin: 0; color: #cbd5e1; font-size: 0.95rem; line-height: 1.5;">
+                    {{ mentor_intro }}
+                </p>
+            </div>
+        </div>
+        <!-- Skills in the learner's selected tier -->
+        <div style="margin-top: 1rem; padding-top: 0.85rem; border-top: 1px solid rgba(255,255,255,0.06);"></div>
+        <div
+            style="font-size: 0.82rem; font-weight: 700; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.75rem;">
+            Your {{ goal.chosen_tier }} focus
+        </div>
+
+        <div class="focus-levels">
+            {% for item in key_skills %}
+            <div class="focus-level">
+                <h2>{{ item.name }}</h2>
+                <ul class="focus-topics">
+                    {% for topic in item.concepts %}<li>{{ topic }}</li>{% empty %}<li>Topics will appear here soon.</li>{% endfor %}
+                </ul>
+            </div>
+            {% empty %}
+            <div>
+                <strong style="color: var(--accent-cyan);">{{ skill.name }}</strong>
+                <span>{{ skill.description|default:"Core concepts and practical skills" }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+    <!-- Assessment Form -->
+    <form method="POST" id="assessment-form">
+        {% csrf_token %}
+
+        <div style="display: flex; flex-direction: column; gap: 0.9rem; margin-bottom: 1.25rem;">
+            {% for q in questions %}
+            <div class="card question-card"
+                style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: 14px; padding: 1.1rem 1.25rem; transition: all 0.2s;">
+
+                <!-- Clear Question Header Mention -->
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem;">
+                    <div style="display: flex; align-items: center; gap: 0.6rem;">
+                        <span
+                            style="font-size: 0.8rem; font-weight: 800; color: var(--accent-cyan); text-transform: uppercase; letter-spacing: 1.2px; background: rgba(0, 229, 255, 0.1); padding: 0.2rem 0.65rem; border-radius: 6px;">
+                            Question {{ forloop.counter }} of {{ questions|length }}
+                        </span>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">
+                            Focus: <strong style="color: #cbd5e1;">{{ q.topic|default:"Knowledge Check" }}</strong>
+
+                        </span>
+                    </div>
+                    <span style="font-size: 0.75rem; color: var(--text-muted);">
+                        Select 1 option or type below
+                    </span>
+                </div>
+
+                <!-- Clearly Mentioned Question Prompt (in 1-2 lines) -->
+                <h3
+                    style="margin: 0 0 1.15rem 0; font-size: 1.15rem; line-height: 1.5; color: var(--text-main); font-weight: 600;">
+                    {{ q.question|default:q.prompt }}
+                </h3>
+
+                <!-- 1-Click Option Pills -->
+                {% if q.options %}
+                <div style="display: flex; flex-direction: column; gap: 0.65rem; margin-bottom: 0.85rem;">
+                    {% for opt in q.options %}
+                    <label class="opt-label"
+                        style="display: flex; align-items: center; gap: 0.85rem; padding: 0.75rem 1rem; background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; cursor: pointer; transition: all 0.2s;"
+                        onmouseover="this.style.borderColor='rgba(0, 229, 255, 0.4)'; this.style.background='rgba(0, 229, 255, 0.04)'"
+                        onmouseout="if(!this.querySelector('input').checked){this.style.borderColor='rgba(255,255,255,0.07)'; this.style.background='rgba(255,255,255,0.02)'}">
+                        <input type="radio" name="answer_{{ forloop.parentloop.counter0 }}" value="{{ opt }}" required
+                            style="accent-color: var(--accent-cyan); width: 17px; height: 17px; flex-shrink: 0;"
+                            onchange="onSelectOption(this, '{{ forloop.parentloop.counter0 }}')">
+                        <span
+                            style="display: inline-flex; width: 22px; height: 22px; border-radius: 6px; background: rgba(255,255,255,0.05); align-items: center; justify-content: center; font-weight: 700; font-size: 0.75rem; color: var(--accent-cyan); flex-shrink: 0;">
+                            {% if forloop.counter == 1 %}
+                            A
+                            {% elif forloop.counter == 2 %}
+                            B
+                            {% elif forloop.counter == 3 %}
+                            C
+                            {% else %}
+                            D
+                            {% endif %}
+
+                        </span>
+                        <span style="color: var(--text-main); font-size: 0.92rem; line-height: 1.4;">{{ opt }}</span>
+
+                    </label>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- 1-2 Lines Compact Text Box (User-Friendly Write-in or Custom Note) -->
+                <div style="margin-top: 0.5rem; padding-top: 0.65rem; border-top: 1px dashed rgba(255,255,255,0.07);">
+                    <div
+                        style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.4rem;">
+                        <span style="font-size: 0.78rem; color: var(--text-muted); font-weight: 500;">
+                            ✍️ Or type your own answer in 1-2 lines (optional):
+                        </span>
+                    </div>
+                    <input type="text" id="custom-input-{{ forloop.counter0 }}"
+                        placeholder="e.g. {{ q.options.0|default:'Type your answer here in 1 line...' }}"
+                        maxlength="200"
+                        style="width: 100%; height: 42px; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0.5rem 0.9rem; color: #fff; font-size: 0.9rem; font-family: inherit; box-sizing: border-box; outline: none; transition: border-color 0.2s;"
+                        onfocus="this.style.borderColor='var(--accent-cyan)'"
+                        onblur="this.style.borderColor='rgba(255,255,255,0.1)'"
+                        oninput="onTypeCustom(this, '{{ forloop.counter0 }}')">
+                </div>
+
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Submit Button Card -->
+        <div class="card"
+            style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(0, 229, 255, 0.08)); border: 1px solid rgba(0, 229, 255, 0.3); border-radius: 16px; padding: 1.75rem; text-align: center;">
+            <p style="margin: 0 0 1.25rem 0; color: var(--text-muted); font-size: 0.95rem;">
+                Ready? Your answers help us focus on what matters most.
+            </p>
+            <button type="submit" id="submit-assessment-btn" class="btn-primary"
+                style="background: var(--gradient-primary); border: none; color: #000; font-weight: 800; padding: 1rem 3rem; font-size: 1.05rem; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 0.75rem; box-shadow: 0 4px 20px rgba(0, 229, 255, 0.3); transition: transform 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                Continue to your lessons &rarr;
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+    function onSelectOption(radio, qIndex) {
+        const card = radio.closest('.question-card');
+        const labels = card.querySelectorAll('.opt-label');
+        labels.forEach(l => {
+            l.style.borderColor = 'rgba(255,255,255,0.07)';
+            l.style.background = 'rgba(255,255,255,0.02)';
+        });
+        const activeLabel = radio.closest('.opt-label');
+        activeLabel.style.borderColor = 'var(--accent-cyan)';
+        activeLabel.style.background = 'rgba(0, 229, 255, 0.08)';
+
+        // Clear custom input if radio is selected
+        const customInput = document.getElementById('custom-input-' + qIndex);
+        if (customInput) customInput.value = '';
+    }
+
+    function onTypeCustom(input, qIndex) {
+        if (input.value.trim().length > 0) {
+            // Uncheck radios and set a hidden radio with the typed value so form submission gets it
+            const card = input.closest('.question-card');
+            const radios = card.querySelectorAll(`input[name="answer_${qIndex}"]`);
+            radios.forEach(r => {
+                r.checked = false;
+                r.required = false;
+            });
+            const labels = card.querySelectorAll('.opt-label');
+            labels.forEach(l => {
+                l.style.borderColor = 'rgba(255,255,255,0.07)';
+                l.style.background = 'rgba(255,255,255,0.02)';
+            });
+
+            // Find or create the hidden override input
+            let override = document.getElementById('override-' + qIndex);
+            if (!override) {
+                override = document.createElement('input');
+                override.type = 'hidden';
+                override.name = `answer_${qIndex}`;
+                override.id = 'override-' + qIndex;
+                card.appendChild(override);
+            }
+            override.value = input.value;
+        } else {
+            const override = document.getElementById('override-' + qIndex);
+            if (override) override.remove();
+            const card = input.closest('.question-card');
+            const radios = card.querySelectorAll(`input[type="radio"]`);
+            if (radios.length > 0) {
+                radios[0].required = true;
+            }
+        }
+    }
+
+    let isSpeaking = false;
+    let synth = window.speechSynthesis;
+
+    function toggleVoice() {
+        if (isSpeaking) {
+            synth.cancel();
+            isSpeaking = false;
+            document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+            return;
+        }
+
+        const textToRead = [
+            document.getElementById('tts-intro')?.innerText,
+            "Please answer the assessment questions to build your personalized skill path."
+        ].filter(Boolean).join('. ');
+
+        if (!textToRead) return;
+
+        const utterance = new SpeechSynthesisUtterance(textToRead);
+        utterance.rate = 1.0;
+        utterance.onend = () => {
+            isSpeaking = false;
+            document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+        };
+        utterance.onerror = () => {
+            isSpeaking = false;
+            document.getElementById('voice-btn').innerText = "🔊 Read Aloud";
+        };
+
+        isSpeaking = true;
+        document.getElementById('voice-btn').innerText = "⏹️ Stop";
+        synth.speak(utterance);
+    }
+</script>
+{% endblock %}
